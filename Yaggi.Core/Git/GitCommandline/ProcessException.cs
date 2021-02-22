@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -36,7 +36,7 @@ namespace Yaggi.Core.Git.GitCommandline
 		/// <param name="output">Process output</param>
 		/// <param name="error">Process error</param>
 		internal ProcessException(string command, int exitCode, string output = null, string error = null) : base(
-			$"Process {command} exitted with {exitCode:X8}{(string.IsNullOrEmpty(output) ? "" : $"\nOutput:\n{output}")}{(string.IsNullOrEmpty(error) ? "" : $"\nError\n{error}")}")
+			$"Process \"{command}\" exitted with 0x{exitCode:X8}{(string.IsNullOrEmpty(output) ? "" : $"\nOutput: {output}")}{(string.IsNullOrEmpty(error) ? "" : $"\nError: {error}")}")
 		{
 			Command = command;
 			Output = output;
