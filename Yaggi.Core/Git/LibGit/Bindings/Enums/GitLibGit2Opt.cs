@@ -1,0 +1,37 @@
+﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
+{
+	public enum GitLibGit2Opt
+	{
+		GetMwindowSize,
+		SetMwindowSize,
+		GetMwindowMappedLimit,
+		SetMwindowMappedLimit,
+		GetSearchPath,
+		SetSearchPath,
+		SetCacheObjectLimit,
+		SetCacheMaxSize,
+		EnableCaching,
+		GetCachedMemory,
+		GetTemplatePath,
+		SetTemplatePath,
+		SetSslCertLocations,
+		SetUserAgent,
+		EnableStrictObjectCreation,
+		EnableStrictSymbolicRefCreation,
+		SetSslCiphers,
+		GetUserAgent,
+		EnableOfsDelta,
+		EnableFsyncGitdir,
+		GetWindowsSharemode,
+		SetWindowsSharemode,
+		EnableStrictHashVerification,
+		SetAllocator,
+		EnableUnsavedIndexSafety,
+		GetPackMaxObjects,
+		SetPackMaxObjects,
+		DisablePackKeepFileChecks,
+		EnableHttpExpectContinue,
+		GetMwindowFileLimit,
+		SetMwindowFileLimit
+	}
+}
