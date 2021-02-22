@@ -9,7 +9,7 @@ namespace Yaggi.Core.Git.LibGit
 
 		internal LibGitRepository(Bindings.Structures.GitRepository* handle, string path) : base(path)
 		{
-			if (_handle == null)
+			if (handle == null)
 				throw new ArgumentNullException(nameof(handle));
 			_handle = handle;
 		}

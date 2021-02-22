@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -18,7 +18,7 @@ namespace Yaggi.Core.Git.GitCommandline
 		private static readonly object ConsoleEncodingLock = new();
 		private static Encoding _encodingCache;
 
-		private static Encoding ConsoleEncoding
+		public static Encoding SystemConsoleEncoding
 		{
 			get
 			{
@@ -97,11 +97,12 @@ namespace Yaggi.Core.Git.GitCommandline
 		/// </summary>
 		/// <param name="fileName">Executable name</param>
 		/// <param name="arguments">Arguments</param>
+		/// <param name="encoding">Encoding used to read process output</param>
 		/// <param name="workingDirectory">Working directory, current if null</param>
 		/// <returns>Process exit code</returns>
-		public static void CreateProcess(string fileName, string arguments, string workingDirectory = null)
+		public static void CreateProcess(string fileName, string arguments, Encoding encoding, string workingDirectory = null)
 		{
-			CreateProcess(fileName, arguments, out _, out _, workingDirectory);
+			CreateProcess(fileName, arguments, encoding, out _, out _, workingDirectory);
 		}
 
 		/// <summary>
@@ -109,11 +110,12 @@ namespace Yaggi.Core.Git.GitCommandline
 		/// </summary>
 		/// <param name="fileName">Executable name</param>
 		/// <param name="arguments">Arguments</param>
+		/// <param name="encoding">Encoding used to read process output</param>
 		/// <param name="output">Process output</param>
 		/// <param name="error">Process error</param>
 		/// <param name="workingDirectory">Working directory, current if null</param>
 		/// <returns>Process exit code</returns>
-		public static void CreateProcess(string fileName, string arguments, out string output, out string error, string workingDirectory = null)
+		public static void CreateProcess(string fileName, string arguments, Encoding encoding, out string output, out string error, string workingDirectory = null)
 		{
 			using (Process process = new()
 			{
@@ -123,8 +125,8 @@ namespace Yaggi.Core.Git.GitCommandline
 					CreateNoWindow = true,
 					RedirectStandardOutput = true,
 					RedirectStandardError = true,
-					StandardOutputEncoding = ConsoleEncoding,
-					StandardErrorEncoding = ConsoleEncoding,
+					StandardOutputEncoding = encoding,
+					StandardErrorEncoding = encoding,
 					WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
 				}
 			})

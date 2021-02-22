@@ -114,9 +114,6 @@ namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 	public readonly struct GitRemoteHead { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRemoteCallbacks { }
-
-	[StructLayout(LayoutKind.Sequential)]
 	public readonly struct GitCert { }
 
 	[StructLayout(LayoutKind.Sequential)]

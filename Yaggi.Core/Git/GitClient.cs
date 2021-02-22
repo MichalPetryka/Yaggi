@@ -5,6 +5,7 @@ namespace Yaggi.Core.Git
 	public abstract class GitClient : IDisposable
 	{
 		public abstract GitRepository InitializeRepository(string path, string branchName);
+		public abstract GitRepository CloneRepository(string path, string url);
 
 		protected abstract void Dispose(bool disposing);
 

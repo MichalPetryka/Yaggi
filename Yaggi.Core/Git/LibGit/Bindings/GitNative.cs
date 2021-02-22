@@ -32,13 +32,28 @@ namespace Yaggi.Core.Git.LibGit.Bindings
 		private static extern void ClearError();
 
 		[DllImport(Library, EntryPoint = "git_repository_init_options_init", CallingConvention = Convention)]
-		public static extern GitErrorCode InitializeOptions(GitRepositoryInitOptions* options, uint version);
+		public static extern GitErrorCode InitializeInitOptions(GitRepositoryInitOptions* options, uint version);
 
 		[DllImport(Library, EntryPoint = "git_repository_init_ext", CallingConvention = Convention, BestFitMapping = false)]
 		public static extern GitErrorCode InitializeRepository(out Structures.GitRepository* repository, [MarshalAs(StringType)] string path, GitRepositoryInitOptions* options);
 
+		[DllImport(Library, EntryPoint = "git_clone_options_init", CallingConvention = Convention)]
+		public static extern GitErrorCode InitializeCloneOptions(GitCloneOptions* options, uint version);
+
+		[DllImport(Library, EntryPoint = "git_clone", CallingConvention = Convention, BestFitMapping = false)]
+		public static extern GitErrorCode CloneRepository(out Structures.GitRepository* repository, [MarshalAs(StringType)] string url, [MarshalAs(StringType)] string path, GitCloneOptions* options);
+
 		[DllImport(Library, EntryPoint = "git_repository_free", CallingConvention = Convention)]
 		public static extern void FreeRepository(Structures.GitRepository* repository);
+
+		[DllImport(Library, EntryPoint = "git_remote_init_callbacks", CallingConvention = Convention)]
+		public static extern GitErrorCode InitializeRemoteOptions(GitRemoteCallbacks* options, uint version);
+
+		[DllImport(Library, EntryPoint = "git_proxy_options_init", CallingConvention = Convention)]
+		public static extern GitErrorCode InitializeProxyOptions(GitProxyOptions* options, uint version);
+
+		[DllImport(Library, EntryPoint = "git_strarray_dispose", CallingConvention = Convention)]
+		public static extern void FreeStrArray(GitStrArray* array);
 
 		public static bool TryGetError(out string message, out GitErrorClass error)
 		{

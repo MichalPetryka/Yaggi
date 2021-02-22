@@ -22,7 +22,7 @@ namespace Yaggi.Core.Git.LibGit
 		public override GitRepository InitializeRepository(string path, string branchName)
 		{
 			GitRepositoryInitOptions options = new();
-			ThrowHelper.ThrowOnError(GitNative.InitializeOptions(&options, 1));
+			ThrowHelper.ThrowOnError(GitNative.InitializeInitOptions(&options, 1));
 			options.flags |= GitRepositoryInitFlag.NoReinit | GitRepositoryInitFlag.Mkdir | GitRepositoryInitFlag.Mkpath;
 			using (NativeString branch = new(branchName, StringEncoding.UTF8))
 			{
@@ -30,6 +30,14 @@ namespace Yaggi.Core.Git.LibGit
 				ThrowHelper.ThrowOnError(GitNative.InitializeRepository(out Bindings.Structures.GitRepository* repository, path, &options));
 				return new LibGitRepository(repository, path);
 			}
+		}
+
+		public override GitRepository CloneRepository(string path, string url)
+		{
+			GitCloneOptions options = new();
+			ThrowHelper.ThrowOnError(GitNative.InitializeCloneOptions(&options, 1));
+			ThrowHelper.ThrowOnError(GitNative.CloneRepository(out Bindings.Structures.GitRepository* repository, url, path, &options));
+			return new LibGitRepository(repository, path);
 		}
 
 		protected override void Dispose(bool disposing)

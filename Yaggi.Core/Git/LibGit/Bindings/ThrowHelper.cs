@@ -15,7 +15,7 @@ namespace Yaggi.Core.Git.LibGit.Bindings
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int ThrowOnError(int value)
 		{
-			if (value > 0)
+			if (value < 0)
 				Throw((GitErrorCode)value);
 			return value;
 		}
