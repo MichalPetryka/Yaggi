@@ -6,18 +6,19 @@ namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 	[StructLayout(LayoutKind.Sequential)]
 	public struct GitRemoteCallbacks
 	{
-		private uint version;
-		private IntPtr completion;
-		private IntPtr credentials;
-		private IntPtr certificate_check;
-		private IntPtr transfer_progress;
-		private IntPtr update_tips;
-		private IntPtr pack_progress;
-		private IntPtr push_transfer_progress;
-		private IntPtr push_update_reference;
-		private IntPtr push_negotiation;
-		private IntPtr transport;
-		private IntPtr payload;
-		private IntPtr resolve_url;
+		public uint version;
+		public IntPtr sidebandProgress;
+		public IntPtr completion;
+		public IntPtr credentials;
+		public IntPtr certificateCheck;
+		public IntPtr transferProgress;
+		public IntPtr updateTips;
+		public IntPtr packProgress;
+		public IntPtr pushTransferProgress;
+		public IntPtr pushUpdateReference;
+		public IntPtr pushNegotiation;
+		public IntPtr transport;
+		public IntPtr payload;
+		public IntPtr resolveUrl;
 	}
 }

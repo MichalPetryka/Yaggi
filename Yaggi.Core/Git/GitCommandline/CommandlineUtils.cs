@@ -99,10 +99,12 @@ namespace Yaggi.Core.Git.GitCommandline
 		/// <param name="arguments">Arguments</param>
 		/// <param name="encoding">Encoding used to read process output</param>
 		/// <param name="workingDirectory">Working directory, current if null</param>
+		/// <param name="outData">Process output callback</param>
+		/// <param name="errorData">Process error callback</param>
 		/// <returns>Process exit code</returns>
-		public static void CreateProcess(string fileName, string arguments, Encoding encoding, string workingDirectory = null)
+		public static void CreateProcess(string fileName, string arguments, Encoding encoding, string workingDirectory = null, Action<string> outData = null, Action<string> errorData = null)
 		{
-			CreateProcess(fileName, arguments, encoding, out _, out _, workingDirectory);
+			CreateProcess(fileName, arguments, encoding, out _, out _, workingDirectory, outData, errorData);
 		}
 
 		/// <summary>
@@ -114,8 +116,10 @@ namespace Yaggi.Core.Git.GitCommandline
 		/// <param name="output">Process output</param>
 		/// <param name="error">Process error</param>
 		/// <param name="workingDirectory">Working directory, current if null</param>
+		/// <param name="outData">Process output callback</param>
+		/// <param name="errorData">Process error callback</param>
 		/// <returns>Process exit code</returns>
-		public static void CreateProcess(string fileName, string arguments, Encoding encoding, out string output, out string error, string workingDirectory = null)
+		public static void CreateProcess(string fileName, string arguments, Encoding encoding, out string output, out string error, string workingDirectory = null, Action<string> outData = null, Action<string> errorData = null)
 		{
 			using (Process process = new()
 			{
@@ -140,13 +144,19 @@ namespace Yaggi.Core.Git.GitCommandline
 				process.OutputDataReceived += (_, args) =>
 				{
 					lock (outputLock)
+					{
 						outputBuilder.AppendLine(args.Data);
+						outData?.Invoke(args.Data);
+					}
 				};
 
 				process.ErrorDataReceived += (_, args) =>
 				{
 					lock (errorLock)
+					{
 						errorBuilder.AppendLine(args.Data);
+						errorData?.Invoke(args.Data);
+					}
 				};
 
 				process.Start();

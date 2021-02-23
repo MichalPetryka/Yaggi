@@ -8,14 +8,14 @@ namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 	public struct GitCloneOptions
 	{
 		public uint version;
-		public GitCheckoutOptions checkout_opts;
-		public GitFetchOptions fetch_opts;
+		public GitCheckoutOptions checkoutOpts;
+		public GitFetchOptions fetchOpts;
 		public int bare;
 		public GitCloneLocal local;
-		public IntPtr checkout_branch;
-		public IntPtr repository_cb;
-		public IntPtr repository_cb_payload;
-		public IntPtr remote_cb;
-		public IntPtr remote_cb_payload;
+		public IntPtr checkoutBranch;
+		public IntPtr repositoryCb;
+		public IntPtr repositoryCbPayload;
+		public IntPtr remoteCb;
+		public IntPtr remoteCbPayload;
 	}
 }
