@@ -10,10 +10,10 @@ namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 		public uint version;
 		public GitRepositoryInitFlag flags;
 		public GitRepositoryInitMode mode;
-		public IntPtr workdir_path;
+		public IntPtr workdirPath;
 		public IntPtr description;
-		public IntPtr template_path;
-		public IntPtr initial_head;
-		public IntPtr origin_url;
+		public IntPtr templatePath;
+		public IntPtr initialHead;
+		public IntPtr originUrl;
 	}
 }
