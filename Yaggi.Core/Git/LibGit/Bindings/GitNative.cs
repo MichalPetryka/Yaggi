@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings.Enums;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
 
@@ -54,6 +55,30 @@ namespace Yaggi.Core.Git.LibGit.Bindings
 
 		[DllImport(Library, EntryPoint = "git_strarray_dispose", CallingConvention = Convention)]
 		public static extern void FreeStrArray(GitStrArray* array);
+
+		[DllImport(Library, EntryPoint = "git_remote_list", CallingConvention = Convention)]
+		public static extern GitErrorCode ListRemotes(GitStrArray* array, Structures.GitRepository* repository);
+
+		[DllImport(Library, EntryPoint = "git_remote_lookup", CallingConvention = Convention)]
+		public static extern GitErrorCode LookupRemote(Structures.GitRemote** remote, Structures.GitRepository* repository, IntPtr name);
+
+		[DllImport(Library, EntryPoint = "git_remote_lookup", CallingConvention = Convention, BestFitMapping = false)]
+		public static extern GitErrorCode LookupRemote(Structures.GitRemote** remote, Structures.GitRepository* repository, [MarshalAs(StringType)] string name);
+
+		[DllImport(Library, EntryPoint = "git_remote_free", CallingConvention = Convention)]
+		public static extern void FreeRemote(Structures.GitRemote* remote);
+
+		[DllImport(Library, EntryPoint = "git_remote_name", CallingConvention = Convention)]
+		public static extern IntPtr GetRemoteName(Structures.GitRemote* remote);
+
+		[DllImport(Library, EntryPoint = "git_remote_rename", CallingConvention = Convention, BestFitMapping = false)]
+		public static extern GitErrorCode SetRemoteName(GitStrArray* problems, Structures.GitRepository* repository, [MarshalAs(StringType)] string name, [MarshalAs(StringType)] string newName);
+
+		[DllImport(Library, EntryPoint = "git_remote_url", CallingConvention = Convention)]
+		public static extern IntPtr GetRemoteUrl(Structures.GitRemote* remote);
+
+		[DllImport(Library, EntryPoint = "git_remote_set_url", CallingConvention = Convention, BestFitMapping = false)]
+		public static extern GitErrorCode SetRemoteUrl(Structures.GitRepository* repository, [MarshalAs(StringType)] string remote, [MarshalAs(StringType)] string url);
 
 		public static bool TryGetError(out string message, out GitErrorClass error)
 		{
