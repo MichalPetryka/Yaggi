@@ -68,7 +68,7 @@
       HorizontalAlignment="Right"
       Orientation="Horizontal"
       Margin="5"
-      Grid.Row="2">
+      Grid.Row="1">
         <Button Content="Cancel" Click="CancelButton_Click"/>
         <Button Content="Continue" Click="ConfirmButton_Click"/>
     </StackPanel>

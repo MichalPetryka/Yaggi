@@ -1,7 +1,6 @@
 ﻿using Avalonia.Collections;
 using Avalonia.Controls;
 using ReactiveUI;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Yaggi.Desktop.Dialogs;
@@ -10,6 +9,11 @@ namespace Yaggi.Desktop.ViewModels
 {
 	public class InputDialogViewModel : ViewModelBase
 	{
+		private AvaloniaList<Control> items = new();
+		private string title;
+		private string header;
+
+		public string Input { get; set; }
 
 		/// <summary>
 		/// Title of the window
@@ -17,14 +21,8 @@ namespace Yaggi.Desktop.ViewModels
 		public string Title
 		{
 			get => title;
-			set => this.RaiseAndSetIfChanged(ref title, value);
+			set => this.RaiseAndSetIfChanged(ref title, value, nameof(Title));
 		}
-		private string title;
-
-		/// <summary>
-		/// Whether header should be visible or not
-		/// </summary>
-		public bool HeaderVisible => !string.IsNullOrWhiteSpace(Header);
 
 		/// <summary>
 		/// Header text
@@ -32,13 +30,23 @@ namespace Yaggi.Desktop.ViewModels
 		public string Header
 		{
 			get => header;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref header, value);
-				this.RaisePropertyChanged(nameof(HeaderVisible));
-			}
+			set => this.RaiseAndSetIfChanged(ref header, value, nameof(HeaderVisible));
 		}
-		private string header;
+
+		/// <summary>
+		/// Whether header should be visible or not
+		/// </summary>
+		public bool HeaderVisible => !string.IsNullOrWhiteSpace(Header);
+
+		/// <summary>
+		/// List of alternating textboxes and textblocks <br/>
+		/// More info: <see cref="InputEntries"/>
+		/// </summary>
+		public AvaloniaList<Control> Items
+		{
+			get => items;
+			set => this.RaiseAndSetIfChanged(ref items, value);
+		}
 
 		/// <summary>
 		/// Set inputs
@@ -54,7 +62,7 @@ namespace Yaggi.Desktop.ViewModels
 					.Zip(
 						value.Select(ie => new TextBox {
 							//set a default value of a input if any was provided
-							Text = !string.IsNullOrWhiteSpace(ie.DefaultValue) ? ie.DefaultValue : "",
+							Text = !string.IsNullOrWhiteSpace(ie.InitialValue) ? ie.InitialValue : "",
 							// show '*' instead of letters if that input should have masked input
 							PasswordChar = ie.MaskInput ? '*' : '\0',
 							//RevealPassword = ie.MaskInput
@@ -66,18 +74,5 @@ namespace Yaggi.Desktop.ViewModels
 				Items.AddRange(items);
 			}
 		}
-
-		/// <summary>
-		/// List of alternating textboxes and textblocks <br/>
-		/// More info: <see cref="InputEntries"/>
-		/// </summary>
-		public AvaloniaList<Control> Items
-		{
-			get => items;
-			set => this.RaiseAndSetIfChanged(ref items, value);
-		}
-		private AvaloniaList<Control> items = new AvaloniaList<Control>();
-
-		public string Input { get; set; }
 	}
 }

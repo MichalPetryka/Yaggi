@@ -1,13 +1,11 @@
-﻿using System;
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Yaggi.Desktop.Extensions;
-using Avalonia.Interactivity;
-using System.Linq;
-using Avalonia.Layout;
 
 namespace Yaggi.Desktop.Dialogs
 {
@@ -24,6 +22,7 @@ namespace Yaggi.Desktop.Dialogs
 			this.AttachDevTools();
 #endif
 		}
+
 		private void InitializeComponent()
 		{
 			AvaloniaXamlLoader.Load(this);
@@ -36,12 +35,10 @@ namespace Yaggi.Desktop.Dialogs
 
 		private void ConfirmButton_Click(object sender, RoutedEventArgs args)
 		{
-			
 			var dc = (ViewModels.InputDialogViewModel)DataContext;
 			//get input as strings from TextBoxes, if textbox text was null, replace it with empty string
-			Close(
-				dc.Items
-					.Where(controls => controls.GetType() == typeof(TextBox))
+			Close(dc.Items
+					.Where(controls => controls is TextBox)
 					.Select(input => ((TextBox)input).Text ?? "")
 					.ToArray());
 		}
@@ -67,13 +64,12 @@ namespace Yaggi.Desktop.Dialogs
 		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
 		/// null if user clicked cancel or closed the window
 		/// </returns>
-		public static async Task<string[]> Show(string title, string header, InputDialogEntry[] inputEntries)
+		public static Task<string[]> Show(string title, string header, params InputDialogEntry[] inputEntries)
 		{
-			
 			var dlg = new InputDialog();
-			if (inputEntries is null || inputEntries.Length == 0)
+			if (inputEntries == null || inputEntries.Length == 0)
 			{
-				throw new ArgumentException($"Parameter \"{nameof(inputEntries)}\" of type {typeof(InputDialogEntry[])} was null or empty");
+				throw new ArgumentException($"Parameter \"{nameof(inputEntries)}\" of type {typeof(InputDialogEntry[])} was null or empty", nameof(inputEntries));
 			}
 			//fill the dialog
 			var dc = new ViewModels.InputDialogViewModel();
@@ -82,32 +78,30 @@ namespace Yaggi.Desktop.Dialogs
 			dc.Header = header;
 			dc.InputEntries = inputEntries;
 
-			return await dlg.ShowDialog<string[]>();
+			return dlg.ShowDialog<string[]>();
 		}
 	}
 
 	/// <summary>
 	/// Represents a single entry in <see cref="InputDialog"/> window
 	/// </summary>
-	public struct InputDialogEntry
+	public readonly struct InputDialogEntry
 	{
+		public readonly string Label;
+		public readonly string InitialValue;
+		public readonly bool MaskInput;
+
 		/// <summary>
 		/// Represents a single entry in <see cref="InputDialog"/> window
 		/// </summary>
 		/// <param name="label">Description of the input</param>
+		/// <param name="initialValue">Initial value of the input</param>
 		/// <param name="maskInput">Should be set to true if input contain a sensitive data such as password or API key</param>
-		public InputDialogEntry(string label, bool maskInput)
+		public InputDialogEntry(string label, string initialValue = null, bool maskInput = false)
 		{
 			Label = label;
 			MaskInput = maskInput;
-			DefaultValue = null;
+			InitialValue = initialValue;
 		}
-		public InputDialogEntry(string label, string defaultValue, bool maskInput) : this(label, maskInput)
-		{
-			DefaultValue = defaultValue;
-		}
-		public readonly string Label;
-		public readonly string DefaultValue;
-		public readonly bool MaskInput;
 	}
 }
