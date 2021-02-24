@@ -95,8 +95,14 @@ namespace Yaggi.Desktop.Dialogs
 		{
 			Label = label;
 			MaskInput = maskInput;
+			DefaultValue = null;
+		}
+		public InputDialogEntry(string label, string defaultValue, bool maskInput) : this(label, maskInput)
+		{
+			DefaultValue = defaultValue;
 		}
 		public readonly string Label;
+		public readonly string DefaultValue;
 		public readonly bool MaskInput;
 	}
 }

@@ -53,9 +53,11 @@ namespace Yaggi.Desktop.ViewModels
 					.Select(ie => new TextBlock { Text = ie.Label })
 					.Zip(
 						value.Select(ie => new TextBox {
+							//set a default value of a input if any was provided
+							Text = !string.IsNullOrWhiteSpace(ie.DefaultValue) ? ie.DefaultValue : "",
 							// show '*' instead of letters if that input should have masked input
 							PasswordChar = ie.MaskInput ? '*' : '\0',
-							RevealPassword = ie.MaskInput
+							//RevealPassword = ie.MaskInput
 						}),
 						(l, m) => new Control[] { l, m })
 					.SelectMany(x => x);
