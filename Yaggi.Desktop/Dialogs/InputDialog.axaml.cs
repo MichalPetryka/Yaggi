@@ -14,7 +14,8 @@ namespace Yaggi.Desktop.Dialogs
 	public class InputDialog : Window
 	{
 		/// <summary>
-		/// Pls don't use this
+		/// Pls don't use this<br/>
+		/// Use <see cref="Show(string, string, InputDialogEntry[])"/> instead
 		/// </summary>
 		public InputDialog()
 		{
@@ -38,7 +39,11 @@ namespace Yaggi.Desktop.Dialogs
 			
 			var dc = (ViewModels.InputDialogViewModel)DataContext;
 			//get input as strings from TextBoxes, if textbox text was null, replace it with empty string
-			Close(dc.Items.Where(x => x.GetType() == typeof(TextBox)).Select(x => ((TextBox)x).Text ?? "").ToArray());
+			Close(
+				dc.Items
+					.Where(controls => controls.GetType() == typeof(TextBox))
+					.Select(input => ((TextBox)input).Text ?? "")
+					.ToArray());
 		}
 
 
