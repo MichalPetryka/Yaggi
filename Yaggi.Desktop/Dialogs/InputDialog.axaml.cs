@@ -15,7 +15,7 @@ namespace Yaggi.Desktop.Dialogs
 
 		/// <summary>
 		/// Pls don't use this<br/>
-		/// Use <see cref="Show(string, string, InputDialogEntry[])"/> instead
+		/// Use <see cref="Show(string, string, InputDialogEntry[])"/> or <see cref="ShowSync(string, string, InputDialogEntry[])"/> instead
 		/// </summary>
 		public InputDialog()
 		{
