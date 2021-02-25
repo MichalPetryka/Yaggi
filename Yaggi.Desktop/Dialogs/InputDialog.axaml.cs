@@ -11,6 +11,8 @@ namespace Yaggi.Desktop.Dialogs
 {
 	public class InputDialog : Window
 	{
+
+
 		/// <summary>
 		/// Pls don't use this<br/>
 		/// Use <see cref="Show(string, string, InputDialogEntry[])"/> instead
@@ -22,6 +24,8 @@ namespace Yaggi.Desktop.Dialogs
 			this.AttachDevTools();
 #endif
 		}
+
+
 
 		private void InitializeComponent()
 		{
@@ -37,11 +41,17 @@ namespace Yaggi.Desktop.Dialogs
 		{
 			var dc = (ViewModels.InputDialogViewModel)DataContext;
 			//get input as strings from TextBoxes, if textbox text was null, replace it with empty string
-			Close(dc.Items
+			Result = dc.Items
 					.Where(controls => controls is TextBox)
 					.Select(input => ((TextBox)input).Text ?? "")
-					.ToArray());
+					.ToArray();
+
+			Close(Result);
 		}
+
+
+		private string[] Result;
+
 
 
 		/// <summary>
@@ -80,6 +90,47 @@ namespace Yaggi.Desktop.Dialogs
 
 			return dlg.ShowDialog<string[]>();
 		}
+
+
+		/// <summary>
+		/// Shows dialog synchronously and returns user input
+		/// </summary>
+		/// <code>
+		/// var output = Dialogs.InputDialog.ShowSync(
+		///		"Window Title",
+		///		"Dialog header",
+		///		new Dialogs.InputDialogEntry[] {
+		///			new Dialogs.InputDialogEntry("Input 1", false),
+		///			new Dialogs.InputDialogEntry("Input 2", true),
+		///	});
+		/// </code>
+		///
+		/// <param name="title">Title of the dialog</param>
+		/// <param name="header">Header of the dialog</param>
+		/// <param name="inputEntries">Array of Input entries</param>
+		/// <returns>
+		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
+		/// null if user clicked cancel or closed the window
+		/// </returns>
+		public static string[] ShowSync(string title, string header, params InputDialogEntry[] inputEntries)
+		{
+			var dlg = new InputDialog();
+			if (inputEntries == null || inputEntries.Length == 0)
+			{
+				throw new ArgumentException($"Parameter \"{nameof(inputEntries)}\" of type {typeof(InputDialogEntry[])} was null or empty", nameof(inputEntries));
+			}
+			//fill the dialog
+			var dc = new ViewModels.InputDialogViewModel();
+			dlg.DataContext = dc;
+			dc.Title = title;
+			dc.Header = header;
+			dc.InputEntries = inputEntries;
+
+			dlg.ShowDialogSync();
+
+			return dlg.Result;
+		}
+
 	}
 
 	/// <summary>
