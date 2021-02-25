@@ -1,8 +1,5 @@
 ﻿using Avalonia.Threading;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +18,7 @@ namespace Yaggi.Desktop.Extensions
 		{
 			bool finished = false;
 
-			dispatcher.InvokeAsync(()=>
+			dispatcher.InvokeAsync(() =>
 			{
 				action();
 				finished = true;
@@ -42,9 +39,9 @@ namespace Yaggi.Desktop.Extensions
 		{
 			bool finished = false;
 
-			dispatcher.InvokeAsync(() =>
+			dispatcher.InvokeAsync(async () =>
 			{
-				function();
+				await function();
 				finished = true;
 			}, priority);
 
