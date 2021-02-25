@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -111,21 +112,29 @@ namespace Yaggi.Desktop.Dialogs
 		/// </returns>
 		public static string[] Show(string title, string header, params InputDialogEntry[] inputEntries)
 		{
-			var dlg = new InputDialog();
 			if (inputEntries == null || inputEntries.Length == 0)
 			{
 				throw new ArgumentException($"Parameter \"{nameof(inputEntries)}\" of type {typeof(InputDialogEntry[])} was null or empty", nameof(inputEntries));
 			}
-			//fill the dialog
-			var dc = new ViewModels.InputDialogViewModel();
-			dlg.DataContext = dc;
-			dc.Title = title;
-			dc.Header = header;
-			dc.InputEntries = inputEntries;
 
-			dlg.WaitForDialog();
+			string[] result = null;
 
-			return dlg.Result;
+			Dispatcher.UIThread.Invoke(() =>
+			{
+				var dlg = new InputDialog();
+
+				//fill the dialog
+				var dc = new ViewModels.InputDialogViewModel();
+				dlg.DataContext = dc;
+				dc.Title = title;
+				dc.Header = header;
+				dc.InputEntries = inputEntries;
+
+				dlg.WaitForDialog();
+				result = dlg.Result;
+			});
+
+			return result;
 		}
 
 	}
