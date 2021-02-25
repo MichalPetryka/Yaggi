@@ -15,7 +15,7 @@ namespace Yaggi.Desktop.Dialogs
 
 		/// <summary>
 		/// Pls don't use this<br/>
-		/// Use <see cref="Show(string, string, InputDialogEntry[])"/> or <see cref="ShowSync(string, string, InputDialogEntry[])"/> instead
+		/// Use <see cref="ShowAsync(string, string, InputDialogEntry[])"/> or <see cref="Show(string, string, InputDialogEntry[])"/> instead
 		/// </summary>
 		public InputDialog()
 		{
@@ -24,8 +24,6 @@ namespace Yaggi.Desktop.Dialogs
 			this.AttachDevTools();
 #endif
 		}
-
-
 
 		private void InitializeComponent()
 		{
@@ -49,10 +47,7 @@ namespace Yaggi.Desktop.Dialogs
 			Close(Result);
 		}
 
-
 		private string[] Result;
-
-
 
 		/// <summary>
 		/// Shows dialog and returns user input
@@ -74,7 +69,7 @@ namespace Yaggi.Desktop.Dialogs
 		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
 		/// null if user clicked cancel or closed the window
 		/// </returns>
-		public static Task<string[]> Show(string title, string header, params InputDialogEntry[] inputEntries)
+		public static Task<string[]> ShowAsync(string title, string header, params InputDialogEntry[] inputEntries)
 		{
 			var dlg = new InputDialog();
 			if (inputEntries == null || inputEntries.Length == 0)
@@ -89,6 +84,8 @@ namespace Yaggi.Desktop.Dialogs
 			dc.InputEntries = inputEntries;
 
 			return dlg.ShowDialog<string[]>();
+
+			
 		}
 
 
@@ -112,7 +109,7 @@ namespace Yaggi.Desktop.Dialogs
 		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
 		/// null if user clicked cancel or closed the window
 		/// </returns>
-		public static string[] ShowSync(string title, string header, params InputDialogEntry[] inputEntries)
+		public static string[] Show(string title, string header, params InputDialogEntry[] inputEntries)
 		{
 			var dlg = new InputDialog();
 			if (inputEntries == null || inputEntries.Length == 0)
@@ -126,7 +123,7 @@ namespace Yaggi.Desktop.Dialogs
 			dc.Header = header;
 			dc.InputEntries = inputEntries;
 
-			dlg.ShowDialogSync();
+			dlg.WaitForDialog();
 
 			return dlg.Result;
 		}

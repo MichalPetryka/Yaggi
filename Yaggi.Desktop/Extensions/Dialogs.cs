@@ -47,7 +47,7 @@ namespace Yaggi.Desktop.Extensions
 		/// The owner of the window will be set to the main window of the app
 		/// </summary>
 		/// <param name="dialog">Dialog Window that you want to show</param>
-		public static void ShowDialogSync(this Window dialog)
+		public static void WaitForDialog(this Window dialog)
 		{
 			if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
 			{
@@ -66,9 +66,8 @@ namespace Yaggi.Desktop.Extensions
 		/// </summary>
 		/// <param name="dialog">Dialog Window that you want to show</param>
 		/// <param name="owner">Owner of the dialog</param>
-		public static void ShowDialogSync(this Window dialog, Window owner)
+		public static void WaitForDialog(this Window dialog, Window owner)
 		{
-
 			using (var source = new CancellationTokenSource())
 			{
 				var dgTask = dialog.ShowDialog(owner).ContinueWith(t => source.Cancel(), TaskScheduler.FromCurrentSynchronizationContext());
