@@ -40,15 +40,15 @@ namespace Yaggi.Desktop.Dialogs
 		{
 			var dc = (ViewModels.InputDialogViewModel)DataContext;
 			//get input as strings from TextBoxes, if textbox text was null, replace it with empty string
-			Result = dc.Items
+			result = dc.Items
 					.Where(controls => controls is TextBox)
 					.Select(input => ((TextBox)input).Text ?? "")
 					.ToArray();
 
-			Close(Result);
+			Close(result);
 		}
 
-		private string[] Result;
+		private string[] result;
 
 		/// <summary>
 		/// Shows dialog and returns user input
@@ -85,8 +85,6 @@ namespace Yaggi.Desktop.Dialogs
 			dc.InputEntries = inputEntries;
 
 			return dlg.ShowDialog<string[]>();
-
-			
 		}
 
 
@@ -119,7 +117,7 @@ namespace Yaggi.Desktop.Dialogs
 
 			string[] result = null;
 
-			Dispatcher.UIThread.Invoke(() =>
+			void MakeWindow()
 			{
 				var dlg = new InputDialog();
 
@@ -131,8 +129,20 @@ namespace Yaggi.Desktop.Dialogs
 				dc.InputEntries = inputEntries;
 
 				dlg.WaitForDialog();
-				result = dlg.Result;
-			});
+				result = dlg.result;
+			}
+
+			if (Dispatcher.UIThread.CheckAccess())
+			{
+				MakeWindow();
+			}
+			else
+			{
+				Dispatcher.UIThread.Invoke(() =>
+				{
+					MakeWindow();
+				});
+			}
 
 			return result;
 		}
