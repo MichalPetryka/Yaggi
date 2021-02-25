@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings.Enums;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
 
@@ -54,6 +55,21 @@ namespace Yaggi.Core.Git.LibGit.Bindings
 
 		[DllImport(Library, EntryPoint = "git_strarray_dispose", CallingConvention = Convention)]
 		public static extern void FreeStrArray(GitStrArray* array);
+
+		[DllImport(Library, EntryPoint = "git_buf_dispose", CallingConvention = Convention)]
+		public static extern void FreeBuf(GitBuf* buffer);
+
+		[DllImport(Library, EntryPoint = "git_buf_grow", CallingConvention = Convention)]
+		public static extern GitErrorCode GrowBuf(GitBuf* buffer, nuint targetSize);
+
+		[DllImport(Library, EntryPoint = "git_buf_set", CallingConvention = Convention)]
+		public static extern GitErrorCode SetBuf(GitBuf* buffer, IntPtr data, nuint dataLength);
+
+		[DllImport(Library, EntryPoint = "git_buf_is_binary", CallingConvention = Convention)]
+		public static extern int BufIsBinary(GitBuf* buffer);
+
+		[DllImport(Library, EntryPoint = "git_buf_contains_nul", CallingConvention = Convention)]
+		public static extern int BufContainsNull(GitBuf* buffer);
 
 		public static bool TryGetError(out string message, out GitErrorClass error)
 		{
