@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
 using Yaggi.Core.Git.LibGit.Bindings.Enums;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
+using Yaggi.Core.IO;
 using Yaggi.Core.Marshaling;
 
 namespace Yaggi.Core.Git.LibGit
@@ -23,6 +25,8 @@ namespace Yaggi.Core.Git.LibGit
 
 		public override GitRepository InitializeRepository(string path, string branchName)
 		{
+			Directory.CreateDirectory(path);
+			path = PathUtils.ValidateDirectoryPath(path);
 			GitRepositoryInitOptions options = new();
 			ThrowHelper.ThrowOnError(GitNative.InitializeInitOptions(&options, 1));
 			options.flags |= GitRepositoryInitFlag.NoReinit | GitRepositoryInitFlag.Mkdir | GitRepositoryInitFlag.Mkpath;
@@ -36,6 +40,8 @@ namespace Yaggi.Core.Git.LibGit
 
 		public override GitRepository CloneRepository(string path, string url, Action<string, double> progress = null)
 		{
+			Directory.CreateDirectory(path);
+			path = PathUtils.ValidateDirectoryPath(path);
 			GitCloneOptions options = new();
 			ThrowHelper.ThrowOnError(GitNative.InitializeCloneOptions(&options, 1));
 			GCHandle? handle1 = null;

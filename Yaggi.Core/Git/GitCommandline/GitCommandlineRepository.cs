@@ -15,7 +15,7 @@ namespace Yaggi.Core.Git.GitCommandline
 				string[] names = output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 				GitRemote[] remotes = new GitRemote[names.Length];
 				for (int i = 0; i < names.Length; i++)
-					TrackRemote(remotes[i] = new GitCommandlineRemote(names[i], this));
+					remotes[i] = TryGetRemote(names[i], name => new GitCommandlineRemote(name, this));
 
 				return remotes;
 			}

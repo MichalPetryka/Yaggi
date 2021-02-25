@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Yaggi.Core.IO;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
@@ -13,6 +14,7 @@ namespace Yaggi.Core.Git.GitCommandline
 		public override GitRepository InitializeRepository(string path, string branchName)
 		{
 			Directory.CreateDirectory(path);
+			path = PathUtils.ValidateDirectoryPath(path);
 			CommandlineUtils.CreateProcess("git", $"init --initial-branch=\"{branchName}\"", Encoding.UTF8, path);
 			return new GitCommandlineRepository(path);
 		}
@@ -20,6 +22,7 @@ namespace Yaggi.Core.Git.GitCommandline
 		public override GitRepository CloneRepository(string path, string url, Action<string, double> progress = null)
 		{
 			Directory.CreateDirectory(path);
+			path = PathUtils.ValidateDirectoryPath(path);
 			long lastProgress = 0;
 			CommandlineUtils.CreateProcess("git", $"clone{(progress != null ? " --progress" : "")} -- \"{url}\" \"{path}\"",
 				Encoding.UTF8, path,

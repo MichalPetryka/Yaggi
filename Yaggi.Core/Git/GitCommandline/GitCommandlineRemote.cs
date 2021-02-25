@@ -15,7 +15,8 @@ namespace Yaggi.Core.Git.GitCommandline
 				if (string.IsNullOrWhiteSpace(value))
 					throw new ArgumentException("Invalid new branch name", nameof(value));
 				CommandlineUtils.CreateProcess("git", $"remote rename \"{_name}\" \"{value}\"", Encoding.UTF8, Repository.Path);
-				Repository.UpdateRemotes(_name, value);
+				Repository.RenameRemote(_name, value);
+				_name = value;
 			}
 		}
 
@@ -38,12 +39,5 @@ namespace Yaggi.Core.Git.GitCommandline
 		{
 			_name = name ?? throw new ArgumentNullException(nameof(name));
 		}
-
-		internal override void Update(string name)
-		{
-			_name = name;
-		}
-
-		protected override void Dispose(bool disposing) { }
 	}
 }

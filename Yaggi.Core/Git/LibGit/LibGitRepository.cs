@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
 using Yaggi.Core.Git.LibGit.Bindings.Enums;
 
@@ -21,9 +22,7 @@ namespace Yaggi.Core.Git.LibGit
 					GitRemote[] remotes = new GitRemote[strArray.count];
 					for (nuint i = 0; i < strArray.count; i++)
 					{
-						Bindings.Structures.GitRemote* remote = null;
-						ThrowHelper.ThrowOnError(GitNative.LookupRemote(&remote, Handle, strArray.strings[i]));
-						TrackRemote(remotes[i] = new LibGitRemote(remote, this));
+						remotes[i] = TryGetRemote(Marshal.PtrToStringUTF8(strArray.strings[i]), name => new LibGitRemote(name, this));
 					}
 
 					return remotes;
