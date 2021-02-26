@@ -16,7 +16,7 @@ namespace Yaggi.Core.Git
 
 		protected GitRepository(string path)
 		{
-			path = PathUtils.ValidateDirectoryPath(path);
+			path = PathUtils.NormalizeDirectoryPath(path);
 			if (!Directory.Exists(System.IO.Path.Combine(path, ".git")))
 				throw new ArgumentException($"Directory \"{path}\" is not a git repository");
 			Path = path;
