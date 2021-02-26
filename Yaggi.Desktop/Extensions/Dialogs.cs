@@ -26,6 +26,7 @@ namespace Yaggi.Desktop.Extensions
 
 			return dialog.ShowDialog<TResult>(desktop.MainWindow);
 		}
+
 		/// <summary>
 		/// Showing a dialog without specifying a owner window<br/>
 		/// The owner of the window will be set to the main window of the app
