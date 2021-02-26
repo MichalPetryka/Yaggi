@@ -20,9 +20,7 @@ namespace Yaggi.Desktop.Extensions
 		public static Task<TResult> ShowDialog<TResult>(this Window dialog)
 		{
 			if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-			{
 				throw new InvalidOperationException("The dialog box can only be opened in the desktop application");
-			}
 
 			return dialog.ShowDialog<TResult>(desktop.MainWindow);
 		}
@@ -36,9 +34,7 @@ namespace Yaggi.Desktop.Extensions
 		public static async Task ShowDialog(this Window dialog)
 		{
 			if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-			{
 				throw new InvalidOperationException("The dialog box can only be opened in the desktop application");
-			}
 
 			await dialog.ShowDialog(desktop.MainWindow);
 		}
@@ -51,9 +47,7 @@ namespace Yaggi.Desktop.Extensions
 		public static void WaitForDialog(this Window dialog)
 		{
 			if (Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-			{
 				throw new InvalidOperationException("The dialog box can only be opened in the desktop application");
-			}
 
 			using (var source = new CancellationTokenSource())
 			{
