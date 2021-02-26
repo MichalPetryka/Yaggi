@@ -12,8 +12,6 @@ namespace Yaggi.Desktop.Dialogs
 {
 	public class InputDialog : Window
 	{
-
-
 		/// <summary>
 		/// Pls don't use this<br/>
 		/// Use <see cref="ShowAsync(string, string, InputDialogEntry[])"/> or <see cref="Show(string, string, InputDialogEntry[])"/> instead
