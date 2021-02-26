@@ -57,7 +57,7 @@ namespace Yaggi.Desktop.Extensions
 
 			using (var source = new CancellationTokenSource())
 			{
-				var dgTask = dialog.ShowDialog(desktop.MainWindow).ContinueWith(t => source.Cancel(), TaskScheduler.FromCurrentSynchronizationContext());
+				_ = dialog.ShowDialog(desktop.MainWindow).ContinueWith(t => source.Cancel(), TaskScheduler.FromCurrentSynchronizationContext());
 				Dispatcher.UIThread.MainLoop(source.Token);
 			}
 		}
@@ -71,7 +71,7 @@ namespace Yaggi.Desktop.Extensions
 		{
 			using (var source = new CancellationTokenSource())
 			{
-				var dgTask = dialog.ShowDialog(owner).ContinueWith(t => source.Cancel(), TaskScheduler.FromCurrentSynchronizationContext());
+				_ = dialog.ShowDialog(owner).ContinueWith(t => source.Cancel(), TaskScheduler.FromCurrentSynchronizationContext());
 				Dispatcher.UIThread.MainLoop(source.Token);
 			}
 		}

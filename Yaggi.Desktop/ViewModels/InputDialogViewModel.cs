@@ -9,9 +9,9 @@ namespace Yaggi.Desktop.ViewModels
 {
 	public class InputDialogViewModel : ViewModelBase
 	{
-		private AvaloniaList<Control> items = new();
-		private string title;
-		private string header;
+		private AvaloniaList<Control> _items = new();
+		private string _title;
+		private string _header;
 
 		public string Input { get; set; }
 
@@ -20,8 +20,8 @@ namespace Yaggi.Desktop.ViewModels
 		/// </summary>
 		public string Title
 		{
-			get => title;
-			set => this.RaiseAndSetIfChanged(ref title, value, nameof(Title));
+			get => _title;
+			set => this.RaiseAndSetIfChanged(ref _title, value, nameof(Title));
 		}
 
 		/// <summary>
@@ -29,8 +29,12 @@ namespace Yaggi.Desktop.ViewModels
 		/// </summary>
 		public string Header
 		{
-			get => header;
-			set => this.RaiseAndSetIfChanged(ref header, value, nameof(HeaderVisible));
+			get => _header;
+			set
+			{
+				this.RaiseAndSetIfChanged(ref _header, value, nameof(Header));
+				this.RaisePropertyChanged(nameof(HeaderVisible));
+			}
 		}
 
 		/// <summary>
@@ -44,8 +48,8 @@ namespace Yaggi.Desktop.ViewModels
 		/// </summary>
 		public AvaloniaList<Control> Items
 		{
-			get => items;
-			set => this.RaiseAndSetIfChanged(ref items, value);
+			get => _items;
+			set => this.RaiseAndSetIfChanged(ref _items, value);
 		}
 
 		/// <summary>
@@ -60,7 +64,8 @@ namespace Yaggi.Desktop.ViewModels
 				var items = value
 					.Select(ie => new TextBlock { Text = ie.Label })
 					.Zip(
-						value.Select(ie => new TextBox {
+						value.Select(ie => new TextBox
+						{
 							//set a default value of a input if any was provided
 							Text = !string.IsNullOrWhiteSpace(ie.InitialValue) ? ie.InitialValue : "",
 							// show '*' instead of letters if that input should have masked input

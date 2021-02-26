@@ -12,7 +12,7 @@ namespace Yaggi.Desktop.Dialogs
 {
 	public class InputDialog : Window
 	{
-		private string[] result;
+		private string[] _result;
 
 		/// <summary>
 		/// Pls don't use this<br/>
@@ -40,12 +40,12 @@ namespace Yaggi.Desktop.Dialogs
 		{
 			var dc = (ViewModels.InputDialogViewModel)DataContext;
 			//get input as strings from TextBoxes, if textbox text was null, replace it with empty string
-			result = dc.Items
+			_result = dc.Items
 					.Where(controls => controls is TextBox)
 					.Select(input => ((TextBox)input).Text ?? "")
 					.ToArray();
 
-			Close(result);
+			Close(_result);
 		}
 
 		/// <summary>
@@ -123,7 +123,7 @@ namespace Yaggi.Desktop.Dialogs
 				dc.InputEntries = inputEntries;
 
 				dlg.WaitForDialog();
-				result = dlg.result;
+				result = dlg._result;
 			}
 
 			if (Dispatcher.UIThread.CheckAccess())
