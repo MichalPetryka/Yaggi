@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Yaggi.Core.Memory
 {
-	public static class ListPool<T> where T : class
+	public static class ListPool<T>
 	{
 		private const int DefaultCapacity = 512;
 		private static readonly ConcurrentQueue<List<T>> Pool = new();

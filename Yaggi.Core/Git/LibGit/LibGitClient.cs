@@ -52,15 +52,28 @@ namespace Yaggi.Core.Git.LibGit
 				// ReSharper disable ConvertToLocalFunction
 				if (authenticationProvider != null)
 				{
+					GitCredentialType type = 0;
+					int tries = 0;
 					GitCallbacks.CredentialAcquireCallback acquireCredentials = (data, ptr, fromUrl, types, _) =>
 					{
+						if (type != types)
+						{
+							tries = 0;
+							type = types;
+						}
+
+						const int maxTries = 3;
+						if (++tries > maxTries)
+							return GitErrorCode.User;
+
+						// ReSharper disable HeapView.BoxingAllocation
 						string prompt = "Provide your authentication data";
 						string remoteUrl = Marshal.PtrToStringUTF8(ptr);
 						if (!string.IsNullOrEmpty(remoteUrl))
 							prompt += $" for \"{remoteUrl}\"";
+						prompt += $" (try {tries} out of {maxTries})";
 						string usernameFromUrl = Marshal.PtrToStringUTF8(fromUrl);
 
-						// ReSharper disable HeapView.BoxingAllocation
 						if (types.HasFlag(GitCredentialType.UserpassPlaintext))
 						{
 							(bool, string[]) input = authenticationProvider(prompt, new[]

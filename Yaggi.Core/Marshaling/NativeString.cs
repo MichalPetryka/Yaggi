@@ -32,23 +32,24 @@ namespace Yaggi.Core.Marshaling
 		{
 			lock (_disposeLock)
 			{
-				if (_valid)
+				if (!_valid)
+					return;
+
+				if (_clearOnFree)
 				{
-					if (_clearOnFree)
+					switch (_encoding)
 					{
-						switch (_encoding)
-						{
-							case StringEncoding.Unicode:
-								new Span<char>(Data.ToPointer(), StringUtils.Strlen((char*)Data)).Clear();
-								break;
-							case StringEncoding.ANSI:
-							case StringEncoding.UTF8:
-								new Span<byte>(Data.ToPointer(), StringUtils.Strlen((byte*)Data)).Clear();
-								break;
-						}
+						case StringEncoding.Unicode:
+							new Span<char>(Data.ToPointer(), StringUtils.Strlen((char*)Data)).Clear();
+							break;
+						case StringEncoding.ANSI:
+						case StringEncoding.UTF8:
+							new Span<byte>(Data.ToPointer(), StringUtils.Strlen((byte*)Data)).Clear();
+							break;
 					}
-					Marshal.FreeCoTaskMem(Data);
 				}
+
+				Marshal.FreeCoTaskMem(Data);
 
 				_valid = false;
 			}
