@@ -99,8 +99,6 @@ namespace Yaggi.Core.Git.GitCommandline
 			return new GitCommandlineRepository(path);
 		}
 
-		protected override void Dispose(bool disposing)
-		{
-		}
+		protected override void Dispose(bool disposing) { }
 	}
 }
