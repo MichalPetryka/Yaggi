@@ -12,6 +12,8 @@ namespace Yaggi.Desktop.Dialogs
 {
 	public class InputDialog : Window
 	{
+		private string[] result;
+
 		/// <summary>
 		/// Pls don't use this<br/>
 		/// Use <see cref="ShowAsync(string, string, InputDialogEntry[])"/> or <see cref="Show(string, string, InputDialogEntry[])"/> instead
@@ -46,8 +48,6 @@ namespace Yaggi.Desktop.Dialogs
 			Close(result);
 		}
 
-		private string[] result;
-
 		/// <summary>
 		/// Shows dialog and returns user input
 		/// </summary>
@@ -72,9 +72,8 @@ namespace Yaggi.Desktop.Dialogs
 		{
 			var dlg = new InputDialog();
 			if (inputEntries == null || inputEntries.Length == 0)
-			{
 				throw new ArgumentException($"Parameter \"{nameof(inputEntries)}\" of type {typeof(InputDialogEntry[])} was null or empty", nameof(inputEntries));
-			}
+
 			//fill the dialog
 			var dc = new ViewModels.InputDialogViewModel();
 			dlg.DataContext = dc;
@@ -84,7 +83,6 @@ namespace Yaggi.Desktop.Dialogs
 
 			return dlg.ShowDialog<string[]>();
 		}
-
 
 		/// <summary>
 		/// Shows dialog synchronously and returns user input
@@ -109,9 +107,7 @@ namespace Yaggi.Desktop.Dialogs
 		public static string[] Show(string title, string header, params InputDialogEntry[] inputEntries)
 		{
 			if (inputEntries == null || inputEntries.Length == 0)
-			{
 				throw new ArgumentException($"Parameter \"{nameof(inputEntries)}\" of type {typeof(InputDialogEntry[])} was null or empty", nameof(inputEntries));
-			}
 
 			string[] result = null;
 
@@ -131,20 +127,12 @@ namespace Yaggi.Desktop.Dialogs
 			}
 
 			if (Dispatcher.UIThread.CheckAccess())
-			{
 				MakeWindow();
-			}
 			else
-			{
-				Dispatcher.UIThread.Invoke(() =>
-				{
-					MakeWindow();
-				});
-			}
+				Dispatcher.UIThread.Invoke(MakeWindow);
 
 			return result;
 		}
-
 	}
 
 	/// <summary>
