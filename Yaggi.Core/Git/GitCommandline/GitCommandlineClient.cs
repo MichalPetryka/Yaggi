@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Yaggi.Core.Cryptography;
+using Yaggi.Core.Cryptography.Crc32C;
 using Yaggi.Core.IO;
 using Yaggi.Core.Memory;
 
@@ -35,8 +36,6 @@ namespace Yaggi.Core.Git.GitCommandline
 			object pipeLock = new();
 			NamedPipeServerStream pipe = null;
 			byte[] key = null;
-			byte[] pipeId = null;
-			string pipeKey = null;
 			string pipeName = null;
 			try
 			{
@@ -44,10 +43,10 @@ namespace Yaggi.Core.Git.GitCommandline
 				{
 					key = new byte[32];
 					RandomNumberGenerator.Fill(key);
-					pipeKey = key.ToHex();
-					pipeId = new byte[32];
+					byte[] pipeId = new byte[32];
 					RandomNumberGenerator.Fill(pipeId);
 					pipeName = $"yaggi-{pipeId.ToHex()}";
+					pipeId.AsSpan().Clear();
 					pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 					// ReSharper disable AccessToDisposedClosure
 					// ReSharper disable AccessToModifiedClosure
@@ -146,7 +145,22 @@ namespace Yaggi.Core.Git.GitCommandline
 								};
 							});
 						process.StartInfo.Environment["YAGGI_PIPE"] = pipeName;
-						process.StartInfo.Environment["YAGGI_KEY"] = pipeKey;
+
+						byte[] keyKey = new byte[32];
+						ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
+						Span<ulong> keyKeyData = MemoryMarshal.Cast<byte, ulong>(keyKey);
+						keyKeyData[0] = time;
+						keyKeyData[1] = time;
+						keyKeyData[2] = ((ulong)Crc32C.Shared.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG")) << 32)
+									| Crc32C.Shared.Calculate(Encoding.UTF8.GetBytes(
+											Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+						uint crc = Crc32C.Shared.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
+						keyKeyData[3] = ((ulong)crc << 32) | (crc ^ uint.MaxValue);
+						byte[] keyEncrypted = AesGcmHelper.Encrypt(key, keyKey);
+						process.StartInfo.Environment["YAGGI_KEY"] = keyEncrypted.ToHex();
+						keyEncrypted.AsSpan().Clear();
+						keyKey.AsSpan().Clear();
+
 						process.StartInfo.Environment["GIT_ASKPASS"] = askpass;
 						process.StartInfo.Environment["SSH_ASKPASS"] = askpass;
 						process.StartInfo.Environment["SSH_ASKPASS_REQUIRE"] = "force";
@@ -239,7 +253,6 @@ namespace Yaggi.Core.Git.GitCommandline
 				lock (pipeLock)
 				{
 					pipe?.Dispose();
-					pipeId?.AsSpan().Clear();
 					key?.AsSpan().Clear();
 					pipe = null;
 				}

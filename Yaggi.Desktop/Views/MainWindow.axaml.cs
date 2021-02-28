@@ -25,7 +25,7 @@ namespace Yaggi.Desktop.Views
 				{
 					using (GitClient client = new GitCommandlineClient())
 					{
-						client.CloneRepository(@"I:\c\hvdfsgffsfgfdgfhghdrftgjhjydsfsdsdddbsfyhbg", @"git@github.com:MichalPetryka/Yaggi.git",
+						client.CloneRepository(@"I:\c\yfgsgfdghdfhjnddhvbgsdf", @"git@github.com:MichalPetryka/Yaggi.git",
 							(s, d) => Debug.WriteLine($"{s} {d:P}"), (s, tuples) =>
 							{
 								string[] a = InputDialog.Show(s, s,
