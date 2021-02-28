@@ -50,9 +50,7 @@ namespace Yaggi.Core.IO
 			else
 			{
 				string realPath = RealPath(path, IntPtr.Zero);
-				if (realPath == null)
-					throw new Win32Exception();
-				path = realPath;
+				path = realPath ?? throw new Win32Exception();
 			}
 			path = Path.GetFullPath(path);
 			if (path.Length > MaxPath)
@@ -100,9 +98,7 @@ namespace Yaggi.Core.IO
 			else
 			{
 				string realPath = RealPath(path, IntPtr.Zero);
-				if (realPath == null)
-					throw new Win32Exception();
-				path = realPath;
+				path = realPath ?? throw new Win32Exception();
 			}
 			path = Path.GetFullPath(path);
 			if (path.Length > MaxPath)
@@ -116,7 +112,7 @@ namespace Yaggi.Core.IO
 		[DllImport("Kernel32", EntryPoint = "GetFinalPathNameByHandleW", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
 		private static extern uint GetFinalPathNameByHandle(IntPtr handle, char* path, uint length, uint flags);
 
-		[DllImport("Kernel32", EntryPoint = "CloseHandle", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+		[DllImport("Kernel32", EntryPoint = "CloseHandle", ExactSpelling = true, SetLastError = true)]
 		private static extern int CloseHandle(IntPtr handle);
 
 		[DllImport("libc", EntryPoint = "realpath", ExactSpelling = true, BestFitMapping = false, SetLastError = true)]

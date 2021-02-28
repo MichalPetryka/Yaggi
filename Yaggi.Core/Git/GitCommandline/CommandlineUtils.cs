@@ -15,7 +15,7 @@ namespace Yaggi.Core.Git.GitCommandline
 	/// </summary>
 	public static class CommandlineUtils
 	{
-		private static readonly object ConsoleEncodingLock = new();
+		/*private static readonly object ConsoleEncodingLock = new();
 		private static Encoding _encodingCache;
 
 		public static Encoding SystemConsoleEncoding
@@ -90,7 +90,7 @@ namespace Yaggi.Core.Git.GitCommandline
 		}
 
 		[DllImport("Kernel32", EntryPoint = "GetConsoleOutputCP", SetLastError = true)]
-		private static extern uint GetConsoleCodePage();
+		private static extern uint GetConsoleCodePage();*/
 
 		/// <summary>
 		/// Creates a process and waits for it to exit
