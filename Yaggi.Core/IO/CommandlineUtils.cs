@@ -54,10 +54,10 @@ namespace Yaggi.Core.IO
 					CreateNoWindow = true,
 					RedirectStandardOutput = true,
 					RedirectStandardError = true,
-					RedirectStandardInput = true,
+					//RedirectStandardInput = true,
 					StandardOutputEncoding = encoding,
 					StandardErrorEncoding = encoding,
-					StandardInputEncoding = encoding,
+					//StandardInputEncoding = encoding,
 					WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
 				}
 			})

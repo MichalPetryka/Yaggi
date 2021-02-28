@@ -18,7 +18,7 @@ namespace Yaggi.Desktop.Extensions
 		{
 			bool finished = false;
 
-			dispatcher.InvokeAsync(() =>
+			dispatcher.Post(() =>
 			{
 				action();
 				finished = true;
