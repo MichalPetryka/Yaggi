@@ -22,11 +22,11 @@
     <ProjectReference Include="..\Yaggi.Askpass\Yaggi.Askpass.csproj" />
   </ItemGroup>
   <Target Name="CopyRuntimeConfigsBuild" BeforeTargets="Build">
-    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).runtimeconfig.json" DestinationFiles="$(OutputPath)\Yaggi.Askpass.runtimeconfig.json" />
-    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).runtimeconfig.dev.json" DestinationFiles="$(OutputPath)\Yaggi.Askpass.runtimeconfig.dev.json" />
+    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).runtimeconfig.json" DestinationFiles="$(OutputPath)\Yaggi.Askpass.runtimeconfig.json" Condition="Exists('$(OutputPath)\$(AssemblyName).runtimeconfig.json')" />
+    <Copy SourceFiles="$(OutputPath)\$(AssemblyName).runtimeconfig.dev.json" DestinationFiles="$(OutputPath)\Yaggi.Askpass.runtimeconfig.dev.json" Condition="Exists('$(OutputPath)\$(AssemblyName).runtimeconfig.dev.json')" />
   </Target>
   <Target Name="CopyRuntimeConfigsPublish" BeforeTargets="Publish">
-    <Copy SourceFiles="$(PublishDir)\$(AssemblyName).runtimeconfig.json" DestinationFiles="$(PublishDir)\Yaggi.Askpass.runtimeconfig.json" />
-    <Copy SourceFiles="$(PublishDir)\$(AssemblyName).runtimeconfig.dev.json" DestinationFiles="$(PublishDir)\Yaggi.Askpass.runtimeconfig.dev.json" />
+    <Copy SourceFiles="$(PublishDir)\$(AssemblyName).runtimeconfig.json" DestinationFiles="$(PublishDir)\Yaggi.Askpass.runtimeconfig.json" Condition="Exists('$(PublishDir)\$(AssemblyName).runtimeconfig.json')" />
+    <Copy SourceFiles="$(PublishDir)\$(AssemblyName).runtimeconfig.dev.json" DestinationFiles="$(PublishDir)\Yaggi.Askpass.runtimeconfig.dev.json" Condition="Exists('$(PublishDir)\$(AssemblyName).runtimeconfig.dev.json')" />
   </Target>
 </Project>
