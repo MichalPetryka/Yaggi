@@ -1,10 +1,11 @@
 ﻿using System.Text;
 using Xunit;
 using Yaggi.Core.Cryptography.Crc32C;
+using Yaggi.Core.Memory;
 
 namespace Yaggi.Core.Tests
 {
-	public class CrcTests
+	public unsafe class CrcTests
 	{
 		[Theory]
 		[InlineData("", 0)]
@@ -81,8 +82,11 @@ namespace Yaggi.Core.Tests
 			Assert.Equal(expected, crcManaged.Calculate(bytes));
 			Assert.Equal(poly, crcManaged.Polynomial);
 
+			Assert.True(Crc32Zlib.Supported);
 			if (Crc32Zlib.Supported)
 			{
+				Assert.NotNull(ZlibNative.Version);
+				Assert.False(ZlibNative.Append == null);
 				Crc32Zlib crc32Zlib = new();
 				Assert.Equal(expected, crc32Zlib.Calculate(bytes));
 				Assert.Equal(poly, crc32Zlib.Polynomial);
