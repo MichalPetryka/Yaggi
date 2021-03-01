@@ -15,13 +15,18 @@ namespace Yaggi.Core.Memory
 		{
 			try
 			{
-				try
+				Module = IntPtr.Zero;
+				foreach (string name in new[] { "zlib1", "libz", "zlib", "libzlib" })
 				{
-					Module = NativeLibrary.Load("zlib1");
-				}
-				catch
-				{
-					Module = NativeLibrary.Load("zlib");
+					try
+					{
+						Module = NativeLibrary.Load(name);
+						break;
+					}
+					catch
+					{
+						// ignore
+					}
 				}
 
 				if (Module == IntPtr.Zero)
@@ -43,6 +48,11 @@ namespace Yaggi.Core.Memory
 			}
 			catch
 			{
+				if (Module != IntPtr.Zero)
+					NativeLibrary.Free(Module);
+				Module = IntPtr.Zero;
+				Version = null;
+				Append = null;
 				Supported = false;
 			}
 		}
