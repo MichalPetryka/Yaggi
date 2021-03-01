@@ -3,11 +3,11 @@ using System.Runtime.InteropServices;
 
 namespace Yaggi.Core.Cryptography.Crc32C
 {
-	internal sealed class Crc32CArm32 : Crc
+	internal sealed class Crc32Arm32 : Crc
 	{
 		public static bool Supported => System.Runtime.Intrinsics.Arm.Crc32.IsSupported;
 
-		internal Crc32CArm32() : base(0x82F63B78)
+		internal Crc32Arm32() : base(0xEDB88320)
 		{
 			if (!Supported)
 				throw new PlatformNotSupportedException();
@@ -21,11 +21,11 @@ namespace Yaggi.Core.Cryptography.Crc32C
 				processed = data.Length / sizeof(uint) * sizeof(uint);
 				ReadOnlySpan<uint> uints = MemoryMarshal.Cast<byte, uint>(data.Slice(0, processed));
 				for (int i = 0; i < uints.Length; i++)
-					crc = System.Runtime.Intrinsics.Arm.Crc32.ComputeCrc32C(crc, uints[i]);
+					crc = System.Runtime.Intrinsics.Arm.Crc32.ComputeCrc32(crc, uints[i]);
 			}
 
 			for (int i = processed; i < data.Length; i++)
-				crc = System.Runtime.Intrinsics.Arm.Crc32.ComputeCrc32C(crc, data[i]);
+				crc = System.Runtime.Intrinsics.Arm.Crc32.ComputeCrc32(crc, data[i]);
 
 			return crc;
 		}

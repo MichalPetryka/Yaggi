@@ -2,13 +2,12 @@
 
 namespace Yaggi.Core.Cryptography.Crc32C
 {
-	internal sealed class Crc32CManaged : Crc32C
+	internal sealed class CrcManaged : Crc
 	{
 		private readonly uint[] _table;
 
-		internal Crc32CManaged()
+		internal CrcManaged(uint polynomial) : base(polynomial)
 		{
-			const uint polynomial = 0x82F63B78;
 			_table = new uint[16 * 256];
 			for (uint i = 0; i < 256; i++)
 			{

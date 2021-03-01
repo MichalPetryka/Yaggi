@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
 
 namespace Yaggi.Core.Cryptography.Crc32C
 {
-	internal sealed class Crc32CSse64 : Crc
+	internal sealed class Crc32Arm64 : Crc
 	{
-		public static bool Supported => Sse42.IsSupported && Sse42.X64.IsSupported;
+		public static bool Supported => System.Runtime.Intrinsics.Arm.Crc32.IsSupported && System.Runtime.Intrinsics.Arm.Crc32.Arm64.IsSupported;
 
-		internal Crc32CSse64() : base(0x82F63B78)
+		internal Crc32Arm64() : base(0xEDB88320)
 		{
 			if (!Supported)
 				throw new PlatformNotSupportedException();
@@ -21,22 +20,19 @@ namespace Yaggi.Core.Cryptography.Crc32C
 			{
 				processed = data.Length / sizeof(ulong) * sizeof(ulong);
 				ReadOnlySpan<ulong> ulongs = MemoryMarshal.Cast<byte, ulong>(data.Slice(0, processed));
-				ulong crclong = crc;
 				for (int i = 0; i < ulongs.Length; i++)
-					crclong = Sse42.X64.Crc32(crclong, ulongs[i]);
-
-				crc = (uint)crclong;
+					crc = System.Runtime.Intrinsics.Arm.Crc32.Arm64.ComputeCrc32(crc, ulongs[i]);
 			}
 			else if (data.Length > sizeof(uint))
 			{
 				processed = data.Length / sizeof(uint) * sizeof(uint);
 				ReadOnlySpan<uint> uints = MemoryMarshal.Cast<byte, uint>(data.Slice(0, processed));
 				for (int i = 0; i < uints.Length; i++)
-					crc = Sse42.Crc32(crc, uints[i]);
+					crc = System.Runtime.Intrinsics.Arm.Crc32.ComputeCrc32(crc, uints[i]);
 			}
 
 			for (int i = processed; i < data.Length; i++)
-				crc = Sse42.Crc32(crc, data[i]);
+				crc = System.Runtime.Intrinsics.Arm.Crc32.ComputeCrc32(crc, data[i]);
 
 			return crc;
 		}

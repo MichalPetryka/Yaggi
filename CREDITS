@@ -1,3 +1,4 @@
 This software uses the following thirdy-party code:
 
 - commandline argument escaping from .NET, by .NET Foundation and Contributors, licensed under MIT (https://github.com/dotnet/runtime)
+- CRC-32C (Castagnoli) for C++ by Mark Adler, Robert Važan, Konstantin Dyachenko, licensed under zlib License (https://github.com/robertvazan/crc32c-hw)

@@ -38,10 +38,10 @@ namespace Yaggi.Askpass
 				Span<ulong> keyKeyData = MemoryMarshal.Cast<byte, ulong>(keyKey);
 				keyKeyData[0] = time;
 				keyKeyData[1] = time;
-				keyKeyData[2] = ((ulong)Crc32C.Shared.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG")) << 32)
-							| Crc32C.Shared.Calculate(Encoding.UTF8.GetBytes(
+				keyKeyData[2] = ((ulong)Crc.Crc32.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG")) << 32)
+							| Crc.Crc32.Calculate(Encoding.UTF8.GetBytes(
 									Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-				uint crc = Crc32C.Shared.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
+				uint crc = Crc.Crc32.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
 				keyKeyData[3] = ((ulong)crc << 32) | (crc ^ uint.MaxValue);
 				key = AesGcmHelper.Decrypt(keyEncrypted, keyKey);
 				keyKey.AsSpan().Clear();
