@@ -27,7 +27,6 @@ namespace Yaggi.Core.Tests
 				Assert.Equal(poly, crc32CHardware.Polynomial);
 			}
 
-			Assert.True(Crc32CSoftware.Supported);
 			if (Crc32CSoftware.Supported)
 			{
 				Crc32CSoftware crc32CSoftware = new();
@@ -82,7 +81,6 @@ namespace Yaggi.Core.Tests
 			Assert.Equal(expected, crcManaged.Calculate(bytes));
 			Assert.Equal(poly, crcManaged.Polynomial);
 
-			Assert.True(Crc32Zlib.Supported);
 			if (Crc32Zlib.Supported)
 			{
 				Crc32Zlib crc32Zlib = new();
