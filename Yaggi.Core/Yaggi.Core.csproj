@@ -15,7 +15,7 @@
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="crc32c32.dll" CopyToOutputDirectory="Always" />
-    <None Include="crc32c64.dll" CopyToOutputDirectory="Always" />
+    <None Include="zlib1.dll" CopyToOutputDirectory="Always" />
+    <None Include="crc32c.dll" CopyToOutputDirectory="Always" />
   </ItemGroup>
 </Project>

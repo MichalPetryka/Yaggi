@@ -20,32 +20,19 @@ namespace Yaggi.Core.Tests
 			Assert.Equal(expected, crcManaged.Calculate(bytes));
 			Assert.Equal(poly, crcManaged.Polynomial);
 
-			if (Crc32CHardware64.Supported)
+			if (Crc32CHardware.Supported)
 			{
-				Crc32CHardware64 crc32CHardware64 = new();
-				Assert.Equal(expected, crc32CHardware64.Calculate(bytes));
-				Assert.Equal(poly, crc32CHardware64.Polynomial);
+				Crc32CHardware crc32CHardware = new();
+				Assert.Equal(expected, crc32CHardware.Calculate(bytes));
+				Assert.Equal(poly, crc32CHardware.Polynomial);
 			}
 
-			if (Crc32CHardware32.Supported)
+			Assert.True(Crc32CSoftware.Supported);
+			if (Crc32CSoftware.Supported)
 			{
-				Crc32CHardware32 crc32CHardware32 = new();
-				Assert.Equal(expected, crc32CHardware32.Calculate(bytes));
-				Assert.Equal(poly, crc32CHardware32.Polynomial);
-			}
-
-			if (Crc32CSoftware64.Supported)
-			{
-				Crc32CSoftware64 crc32CSoftware64 = new();
-				Assert.Equal(expected, crc32CSoftware64.Calculate(bytes));
-				Assert.Equal(poly, crc32CSoftware64.Polynomial);
-			}
-
-			if (Crc32CSoftware32.Supported)
-			{
-				Crc32CSoftware32 crc32CSoftware32 = new();
-				Assert.Equal(expected, crc32CSoftware32.Calculate(bytes));
-				Assert.Equal(poly, crc32CSoftware32.Polynomial);
+				Crc32CSoftware crc32CSoftware = new();
+				Assert.Equal(expected, crc32CSoftware.Calculate(bytes));
+				Assert.Equal(poly, crc32CSoftware.Polynomial);
 			}
 
 			if (Crc32CSse64.Supported)
@@ -94,6 +81,14 @@ namespace Yaggi.Core.Tests
 			CrcManaged crcManaged = new(poly);
 			Assert.Equal(expected, crcManaged.Calculate(bytes));
 			Assert.Equal(poly, crcManaged.Polynomial);
+
+			Assert.True(Crc32Zlib.Supported);
+			if (Crc32Zlib.Supported)
+			{
+				Crc32Zlib crc32Zlib = new();
+				Assert.Equal(expected, crc32Zlib.Calculate(bytes));
+				Assert.Equal(poly, crc32Zlib.Polynomial);
+			}
 
 			if (Crc32Arm64.Supported)
 			{

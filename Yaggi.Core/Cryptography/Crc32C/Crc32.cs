@@ -16,14 +16,11 @@ namespace Yaggi.Core.Cryptography.Crc32C
 			switch (polynomial)
 			{
 				case 0x82F63B78:
-					if (Crc32CHardware64.Supported)
-						return new Crc32CHardware64();
+					if (Crc32CHardware.Supported)
+						return new Crc32CHardware();
 
 					if (Crc32CSse64.Supported)
 						return new Crc32CSse64();
-
-					if (Crc32CHardware32.Supported)
-						return new Crc32CHardware32();
 
 					if (Crc32CSse32.Supported)
 						return new Crc32CSse32();
@@ -34,13 +31,13 @@ namespace Yaggi.Core.Cryptography.Crc32C
 					if (Crc32CArm32.Supported)
 						return new Crc32CArm32();
 
-					if (Crc32CSoftware64.Supported)
-						return new Crc32CSoftware64();
-
-					if (Crc32CSoftware32.Supported)
-						return new Crc32CSoftware32();
+					if (Crc32CSoftware.Supported)
+						return new Crc32CSoftware();
 					break;
 				case 0xEDB88320:
+					if (Crc32Zlib.Supported)
+						return new Crc32Zlib();
+
 					if (Crc32Arm64.Supported)
 						return new Crc32Arm64();
 

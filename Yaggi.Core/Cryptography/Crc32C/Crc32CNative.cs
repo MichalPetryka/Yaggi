@@ -2,15 +2,15 @@
 
 namespace Yaggi.Core.Cryptography.Crc32C
 {
-	internal static unsafe class CrcNative32
+	internal static unsafe class Crc32CNative
 	{
-		private const string Library = "crc32c32";
+		private const string Library = "crc32c";
 		private const CallingConvention Convention = CallingConvention.Cdecl;
 
 		public static readonly bool Supported;
 		public static readonly bool HardwareAccelerated;
 
-		static CrcNative32()
+		static Crc32CNative()
 		{
 			try
 			{
