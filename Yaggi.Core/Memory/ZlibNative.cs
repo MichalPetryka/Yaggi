@@ -16,7 +16,7 @@ namespace Yaggi.Core.Memory
 			try
 			{
 				Module = IntPtr.Zero;
-				foreach (string name in new[] { "zlib1", "libz", "zlib", "libzlib" })
+				foreach (string name in new[] { "zlib1", "libzlib", "libz", "libz.so", "zlib" })
 				{
 					try
 					{

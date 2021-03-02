@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Yaggi.Core.IO
@@ -18,40 +19,7 @@ namespace Yaggi.Core.IO
 			if (!File.Exists(path))
 				throw new FileNotFoundException("File does not exist", path);
 			path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-			{
-				IntPtr handle = CreateFile(path, 0x80000000, 0x00000001 | 0x00000002, IntPtr.Zero, 3, 0x80, IntPtr.Zero);
-				if (handle == InvalidHandle)
-					throw new Win32Exception();
-				char[] buffer = ArrayPool<char>.Shared.Rent(MaxPath + 5);
-				try
-				{
-					uint length;
-					fixed (char* ptr = buffer)
-						length = GetFinalPathNameByHandle(handle, ptr, (uint)buffer.Length, 0);
-					if (length == 0)
-						throw new Win32Exception();
-					if (length >= buffer.Length)
-						throw new Exception();
-					ReadOnlySpan<char> normalizedPath = new(buffer, 0, (int)length);
-					if (normalizedPath.StartsWith(@"\\?\"))
-						normalizedPath = normalizedPath.Slice(4);
-					path = normalizedPath.ToString();
-				}
-				finally
-				{
-					ArrayPool<char>.Shared.Return(buffer);
-#pragma warning disable CA2219
-					if (CloseHandle(handle) == 0)
-						throw new Win32Exception();
-#pragma warning restore CA2219
-				}
-			}
-			else
-			{
-				string realPath = RealPath(path, IntPtr.Zero);
-				path = realPath ?? throw new Win32Exception();
-			}
+			path = GetRealPath(path, false);
 			path = Path.GetFullPath(path);
 			if (path.Length > MaxPath)
 				throw new Exception();
@@ -66,9 +34,19 @@ namespace Yaggi.Core.IO
 				throw new DirectoryNotFoundException("Directory does not exist");
 			path = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
 			path = path.TrimEnd(Path.DirectorySeparatorChar);
+			path = GetRealPath(path, true);
+			path = Path.GetFullPath(path);
+			if (path.Length > MaxPath)
+				throw new Exception();
+			return path;
+		}
+
+		private static string GetRealPath(string path, bool isDirectory)
+		{
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
-				IntPtr handle = CreateFile(path, 0x80000000, 0x00000001 | 0x00000002, IntPtr.Zero, 3, 0x80 | 0x02000000, IntPtr.Zero);
+				IntPtr handle = CreateFile(path, 0x80000000, 0x00000001 | 0x00000002, IntPtr.Zero, 3,
+					0x80u | (isDirectory ? 0x02000000u : 0u), IntPtr.Zero);
 				if (handle == InvalidHandle)
 					throw new Win32Exception();
 				char[] buffer = ArrayPool<char>.Shared.Rent(MaxPath + 5);
@@ -84,7 +62,7 @@ namespace Yaggi.Core.IO
 					ReadOnlySpan<char> normalizedPath = new(buffer, 0, (int)length);
 					if (normalizedPath.StartsWith(@"\\?\"))
 						normalizedPath = normalizedPath.Slice(4);
-					path = normalizedPath.ToString();
+					return normalizedPath.ToString();
 				}
 				finally
 				{
@@ -95,15 +73,35 @@ namespace Yaggi.Core.IO
 #pragma warning restore CA2219
 				}
 			}
+
+			string realPath = RealPath(path, IntPtr.Zero);
+			path = realPath ?? throw new Win32Exception();
+			path = Path.GetFullPath(path);
+
+			string directoryName = Path.GetDirectoryName(path);
+			if (directoryName == null)
+				return path;
+			string basePath = GetRealPath(directoryName, true);
+			string name = Path.GetFileName(path);
+
+			if (isDirectory)
+			{
+				if (!Directory.Exists(Path.Combine(basePath, name)))
+					throw new DirectoryNotFoundException();
+				name = Directory.EnumerateDirectories(basePath, name).FirstOrDefault() ?? Directory
+				.EnumerateDirectories(basePath).First(s =>
+						string.Equals(name, Path.GetFileName(s), StringComparison.OrdinalIgnoreCase));
+			}
 			else
 			{
-				string realPath = RealPath(path, IntPtr.Zero);
-				path = realPath ?? throw new Win32Exception();
+				if (!File.Exists(Path.Combine(basePath, name)))
+					throw new FileNotFoundException();
+				name = Directory.EnumerateFiles(basePath, name).FirstOrDefault() ??
+						Directory.EnumerateFiles(basePath).First(s =>
+							string.Equals(name, Path.GetFileName(s), StringComparison.OrdinalIgnoreCase));
 			}
-			path = Path.GetFullPath(path);
-			if (path.Length > MaxPath)
-				throw new Exception();
-			return path;
+
+			return Path.Combine(basePath, name);
 		}
 
 		[DllImport("Kernel32", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
