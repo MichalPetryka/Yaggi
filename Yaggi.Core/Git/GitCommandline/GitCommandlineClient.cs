@@ -154,8 +154,8 @@ namespace Yaggi.Core.Git.GitCommandline
 						keyKeyData[2] = ((ulong)Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG")) << 32)
 									| Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(
 											Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-						uint crc = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
-						keyKeyData[3] = ((ulong)crc << 32) | (crc ^ uint.MaxValue);
+						keyKeyData[3] = ((ulong)Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory)) << 32) |
+										Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
 						byte[] keyEncrypted = AesGcmHelper.Encrypt(key, keyKey);
 						process.StartInfo.Environment["YAGGI_KEY"] = keyEncrypted.ToHex();
 						keyEncrypted.AsSpan().Clear();

@@ -27,7 +27,7 @@ namespace Yaggi.Core.IO
 		/// <param name="outData">Process output callback</param>
 		/// <param name="errorData">Process error callback</param>
 		/// <returns>Process exit code</returns>
-		public static void CreateProcess(string fileName, string arguments, Encoding encoding, string workingDirectory = null, Action<string, Process> outData = null, Action<string, Process> errorData = null)
+		public static void CreateProcess(string fileName, string arguments, Encoding encoding, string workingDirectory = null, Action<string> outData = null, Action<string> errorData = null)
 		{
 			CreateProcess(fileName, arguments, encoding, out _, out _, workingDirectory, outData, errorData);
 		}
@@ -44,7 +44,7 @@ namespace Yaggi.Core.IO
 		/// <param name="outData">Process output callback</param>
 		/// <param name="errorData">Process error callback</param>
 		/// <returns>Process exit code</returns>
-		public static void CreateProcess(string fileName, string arguments, Encoding encoding, out string output, out string error, string workingDirectory = null, Action<string, Process> outData = null, Action<string, Process> errorData = null)
+		public static void CreateProcess(string fileName, string arguments, Encoding encoding, out string output, out string error, string workingDirectory = null, Action<string> outData = null, Action<string> errorData = null)
 		{
 			using (Process process = new()
 			{
@@ -54,10 +54,8 @@ namespace Yaggi.Core.IO
 					CreateNoWindow = true,
 					RedirectStandardOutput = true,
 					RedirectStandardError = true,
-					//RedirectStandardInput = true,
 					StandardOutputEncoding = encoding,
 					StandardErrorEncoding = encoding,
-					//StandardInputEncoding = encoding,
 					WorkingDirectory = workingDirectory ?? Directory.GetCurrentDirectory()
 				}
 			})
@@ -68,13 +66,12 @@ namespace Yaggi.Core.IO
 				object errorLock = new();
 				StringBuilder errorBuilder = new();
 
-				// ReSharper disable AccessToDisposedClosure
 				process.OutputDataReceived += (_, args) =>
 				{
 					lock (outputLock)
 					{
 						outputBuilder.AppendLine(args.Data);
-						outData?.Invoke(args.Data, process);
+						outData?.Invoke(args.Data);
 					}
 				};
 
@@ -83,10 +80,9 @@ namespace Yaggi.Core.IO
 					lock (errorLock)
 					{
 						errorBuilder.AppendLine(args.Data);
-						errorData?.Invoke(args.Data, process);
+						errorData?.Invoke(args.Data);
 					}
 				};
-				// ReSharper restore AccessToDisposedClosure
 
 				process.Start();
 
