@@ -21,7 +21,7 @@ namespace Yaggi.Askpass
 			ProcessDescriptors.SecureProcess();
 #endif
 			string[] args = Environment.GetCommandLineArgs();
-			// GIT/SSH always invoke with one parameter containg the prompt
+			// GIT/SSH always invoke with one parameter containing the prompt
 			if (args.Length < 2)
 				return 1;
 
