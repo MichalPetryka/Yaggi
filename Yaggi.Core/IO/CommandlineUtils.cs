@@ -1,96 +1,21 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using Yaggi.Core.Git.GitCommandline;
+using Yaggi.Core.Memory;
 
 // ReSharper disable HeapView.BoxingAllocation
 
-namespace Yaggi.Core.Git.GitCommandline
+namespace Yaggi.Core.IO
 {
 	/// <summary>
 	/// Utility class for launching console programs
 	/// </summary>
 	public static class CommandlineUtils
 	{
-		/*private static readonly object ConsoleEncodingLock = new();
-		private static Encoding _encodingCache;
-
-		public static Encoding SystemConsoleEncoding
-		{
-			get
-			{
-				lock (ConsoleEncodingLock)
-				{
-					if (_encodingCache != null)
-						return _encodingCache;
-
-					if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-					{
-						try
-						{
-							// ReSharper disable AssignNullToNotNullAttribute
-							// ReSharper disable PossibleNullReferenceException
-							int cp;
-							using (Process process = Process.Start(new ProcessStartInfo("chcp")
-							{
-								UseShellExecute = false,
-								CreateNoWindow = true,
-								RedirectStandardOutput = true
-							}))
-							{
-								using (StreamReader standardOutput = process.StandardOutput)
-									// it doesn't even return just the cp, also some text
-									cp = int.Parse(string.Concat(standardOutput.ReadLine().Where(char.IsDigit)));
-							}
-
-							if (cp == 0)
-								throw new InvalidOperationException();
-							_encodingCache = Encoding.GetEncoding(cp);
-							return _encodingCache;
-							// ReSharper restore PossibleNullReferenceException
-							// ReSharper restore AssignNullToNotNullAttribute
-						}
-						catch (Exception ex)
-						{
-							// TODO: handle
-						}
-
-						try
-						{
-							uint codePage = GetConsoleCodePage();
-							if (codePage == 0)
-								throw new Win32Exception();
-							_encodingCache = Encoding.GetEncoding((int)codePage);
-							return _encodingCache;
-						}
-						catch (Exception ex)
-						{
-							// TODO: handle
-						}
-					}
-					else
-						try
-						{
-							// ReSharper disable once AssignNullToNotNullAttribute
-							_encodingCache = Encoding.GetEncoding(Environment.GetEnvironmentVariable("LC_CTYPE"));
-							return _encodingCache;
-						}
-						catch (Exception ex)
-						{
-							// TODO: handle
-						}
-
-					_encodingCache = Console.OutputEncoding;
-					return _encodingCache;
-				}
-			}
-		}
-
-		[DllImport("Kernel32", EntryPoint = "GetConsoleOutputCP", SetLastError = true)]
-		private static extern uint GetConsoleCodePage();*/
+		private const char Quote = '\"';
+		private const char Backslash = '\\';
 
 		/// <summary>
 		/// Creates a process and waits for it to exit
@@ -173,6 +98,69 @@ namespace Yaggi.Core.Git.GitCommandline
 				if (process.ExitCode != 0)
 					throw new ProcessException($"{fileName} {arguments}", process.ExitCode, output, error);
 			}
+		}
+
+		public static string EscapeArgument(string argument)
+		{
+			if (string.IsNullOrEmpty(argument))
+				return @"""";
+
+			if (!ContainsWhitespaceOrQuote(argument))
+				return argument;
+
+			StringBuilder sb = StringBuilderPool.Rent(argument.Length * 2);
+
+			sb.Append(Quote);
+			int idx = 0;
+			while (idx < argument.Length)
+			{
+				char c = argument[idx++];
+				switch (c)
+				{
+					case Backslash:
+						int numBackSlash = 1;
+						while (idx < argument.Length && argument[idx] == Backslash)
+						{
+							idx++;
+							numBackSlash++;
+						}
+
+						if (idx == argument.Length)
+							sb.Append(Backslash, numBackSlash * 2);
+						else if (argument[idx] == Quote)
+						{
+							sb.Append(Backslash, numBackSlash * 2 + 1);
+							sb.Append(Quote);
+							idx++;
+						}
+						else
+							sb.Append(Backslash, numBackSlash);
+
+						continue;
+					case Quote:
+						sb.Append(Backslash);
+						sb.Append(Quote);
+						continue;
+					default:
+						sb.Append(c);
+						break;
+				}
+			}
+
+			sb.Append(Quote);
+			return StringBuilderPool.ToStringReturn(sb);
+		}
+
+		private static bool ContainsWhitespaceOrQuote(string s)
+		{
+			for (int i = 0; i < s.Length; i++)
+			{
+				char c = s[i];
+				if (char.IsWhiteSpace(c) || c == Quote)
+					return true;
+			}
+
+			return false;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Yaggi.Core.IO;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
