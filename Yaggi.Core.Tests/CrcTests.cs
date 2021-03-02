@@ -82,7 +82,6 @@ namespace Yaggi.Core.Tests
 			Assert.Equal(expected, crcManaged.Calculate(bytes));
 			Assert.Equal(poly, crcManaged.Polynomial);
 
-			Assert.True(Crc32Zlib.Supported);
 			if (Crc32Zlib.Supported)
 			{
 				Assert.NotNull(ZlibNative.Version);

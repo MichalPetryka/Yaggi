@@ -11,7 +11,7 @@ namespace Yaggi.Core.Tests
 
 		public PathUtilsTests()
 		{
-			string name = Guid.NewGuid() + "abcde";
+			string name = Guid.NewGuid() + "aBcDe";
 			File.Create(name.ToLowerInvariant()).Close();
 			_insensitiveCasing = File.Exists(name.ToUpperInvariant());
 			File.Delete(name.ToLowerInvariant());
@@ -29,6 +29,22 @@ namespace Yaggi.Core.Tests
 					string lower = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToLowerInvariant());
 					string upper = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToUpperInvariant());
 					Assert.Equal(PathUtils.NormalizeFilePath(lower), PathUtils.NormalizeFilePath(upper));
+				}
+				else
+				{
+					string lower = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToLowerInvariant());
+					if (lower != file)
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeFilePath(lower);
+						});
+
+					string upper = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToUpperInvariant());
+					if (upper != file)
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeFilePath(upper);
+						});
 				}
 			}
 		}
@@ -48,6 +64,22 @@ namespace Yaggi.Core.Tests
 					string lower = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToLowerInvariant());
 					string upper = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToUpperInvariant());
 					Assert.Equal(PathUtils.NormalizeDirectoryPath(lower), PathUtils.NormalizeDirectoryPath(upper));
+				}
+				else
+				{
+					string lower = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToLowerInvariant());
+					if (lower != directory)
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeDirectoryPath(lower);
+						});
+
+					string upper = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToUpperInvariant());
+					if (upper != directory)
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeDirectoryPath(upper);
+						});
 				}
 			}
 		}
