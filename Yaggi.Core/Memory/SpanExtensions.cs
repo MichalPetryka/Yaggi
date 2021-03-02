@@ -7,6 +7,7 @@ namespace Yaggi.Core.Memory
 	public static class SpanExtensions
 	{
 		public static string ToHex(this byte[] data) => new ReadOnlySpan<byte>(data).ToHex();
+		public static string ToHex(this Span<byte> data) => ((ReadOnlySpan<byte>)data).ToHex();
 		public static string ToHex(this ReadOnlySpan<byte> data)
 		{
 			StringBuilder sb = new(data.Length * 2);

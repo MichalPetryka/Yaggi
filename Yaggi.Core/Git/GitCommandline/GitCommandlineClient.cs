@@ -43,10 +43,11 @@ namespace Yaggi.Core.Git.GitCommandline
 				{
 					key = new byte[32];
 					RandomNumberGenerator.Fill(key);
-					byte[] pipeId = new byte[32];
+					Span<byte> pipeId = stackalloc byte[32];
 					RandomNumberGenerator.Fill(pipeId);
 					pipeName = $"yaggi-{pipeId.ToHex()}";
-					pipeId.AsSpan().Clear();
+					pipeId.Clear();
+
 					pipe = new NamedPipeServerStream(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
 					// ReSharper disable AccessToDisposedClosure
 					// ReSharper disable AccessToModifiedClosure
@@ -58,50 +59,7 @@ namespace Yaggi.Core.Git.GitCommandline
 								return;
 							try
 							{
-								Span<byte> intBuffer = stackalloc byte[sizeof(int)];
-								pipe.Read(intBuffer);
-								int length = MemoryMarshal.Read<int>(intBuffer);
-								byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
-								Span<byte> data = buffer.AsSpan(0, length);
-								string prompt;
-								try
-								{
-									pipe.Read(data);
-									prompt = Encoding.UTF8.GetString(data);
-								}
-								finally
-								{
-									ArrayPool<byte>.Shared.Return(buffer);
-								}
-								(bool, string[]) r = authenticationProvider(null, new[] { (prompt, (string)null, true) });
-								if (!r.Item1 || string.IsNullOrEmpty(r.Item2[0]))
-								{
-									int e = -1;
-									MemoryMarshal.Write(intBuffer, ref e);
-									pipe.Write(intBuffer);
-									return;
-								}
-
-								byte[] bytes = Encoding.UTF8.GetBytes(r.Item2[0]);
-								try
-								{
-									byte[] encrypted = AesGcmHelper.Encrypt(bytes, key);
-									try
-									{
-										int len = encrypted.Length;
-										MemoryMarshal.Write(intBuffer, ref len);
-										pipe.Write(intBuffer);
-										pipe.Write(encrypted);
-									}
-									finally
-									{
-										encrypted.AsSpan().Clear();
-									}
-								}
-								finally
-								{
-									bytes.AsSpan().Clear();
-								}
+								ProcessPipeConnection(authenticationProvider, pipe, key);
 							}
 							finally
 							{
@@ -129,49 +87,7 @@ namespace Yaggi.Core.Git.GitCommandline
 					}
 				})
 				{
-					if (pipe != null)
-					{
-						string askpass = Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "Yaggi.Askpass*").First(
-							s =>
-							{
-								return Path.GetExtension(s).ToLowerInvariant() switch
-								{
-									".dll" => false,
-									".so" => false,
-									".dylib" => false,
-									".json" => false,
-									".pdb" => false,
-									_ => true
-								};
-							});
-						process.StartInfo.Environment["YAGGI_PIPE"] = pipeName;
-
-						byte[] keyKey = new byte[32];
-						ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
-						Span<ulong> keyKeyData = MemoryMarshal.Cast<byte, ulong>(keyKey);
-						keyKeyData[0] = time;
-						keyKeyData[1] = time;
-						keyKeyData[2] = ((ulong)Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG")) << 32)
-									| Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(
-											Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-						keyKeyData[3] = ((ulong)Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory)) << 32) |
-										Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
-						byte[] keyEncrypted = AesGcmHelper.Encrypt(key, keyKey);
-						process.StartInfo.Environment["YAGGI_KEY"] = keyEncrypted.ToHex();
-						keyEncrypted.AsSpan().Clear();
-						keyKey.AsSpan().Clear();
-
-						process.StartInfo.Environment["GIT_ASKPASS"] = askpass;
-						process.StartInfo.Environment["SSH_ASKPASS"] = askpass;
-						process.StartInfo.Environment["SSH_ASKPASS_REQUIRE"] = "force";
-						if (!process.StartInfo.Environment.ContainsKey("DISPLAY") || string.IsNullOrEmpty(process.StartInfo.Environment["DISPLAY"]))
-							process.StartInfo.Environment["DISPLAY"] = ":0.0";
-					}
-					process.StartInfo.Environment["GIT_TERMINAL_PROMPT"] = "0";
-					process.StartInfo.Environment["GIT_FLUSH"] = "1";
-					process.StartInfo.Environment["GCM_INTERACTIVE"] = "Always";
-					process.StartInfo.Environment["GCM_MODAL_PROMPT"] = "true";
-					process.StartInfo.Environment["GCM_VALIDATE"] = "true";
+					SetupEnvironment(pipe, process, pipeName, key);
 
 					object outputLock = new();
 					StringBuilder outputBuilder = new();
@@ -193,40 +109,7 @@ namespace Yaggi.Core.Git.GitCommandline
 						lock (errorLock)
 						{
 							errorBuilder.AppendLine(args.Data);
-							if (progress == null)
-								return;
-
-							string line = args.Data;
-
-							// check if line contains progress data
-							if (string.IsNullOrEmpty(line))
-								return;
-							int stepEnd = line.LastIndexOf(':');
-							if (stepEnd == -1)
-								return;
-							Match progressData = ProgressRegex.Match(line, stepEnd);
-							if (!progressData.Success)
-								return;
-
-							//parse current and total
-							int progressSplitter = line.IndexOf('/', progressData.Index, progressData.Length);
-							if (progressSplitter == -1)
-								return;
-							bool currentParsed =
-								long.TryParse(line.AsSpan(progressData.Index, progressSplitter - progressData.Index),
-									out long currentProgress);
-							if (!currentParsed || currentProgress == lastProgress)
-								return;
-							bool totalParsed =
-								long.TryParse(
-									line.AsSpan(progressSplitter + 1,
-										progressData.Length + progressData.Index - progressSplitter - 1), out long total);
-							if (!totalParsed)
-								return;
-							lastProgress = currentProgress;
-
-							// call the progress callbacks
-							progress(line.Substring(0, stepEnd), (double)currentProgress / total);
+							HandleProgress(progress, args, ref lastProgress);
 						}
 					};
 
@@ -257,6 +140,136 @@ namespace Yaggi.Core.Git.GitCommandline
 					pipe = null;
 				}
 			}
+		}
+
+		private static void ProcessPipeConnection(Func<string, (string, string, bool)[], (bool, string[])> authenticationProvider, NamedPipeServerStream pipe, byte[] key)
+		{
+			Span<byte> intBuffer = stackalloc byte[sizeof(int)];
+			pipe.Read(intBuffer);
+			int length = MemoryMarshal.Read<int>(intBuffer);
+			byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
+			Span<byte> data = buffer.AsSpan(0, length);
+			string prompt;
+			try
+			{
+				pipe.Read(data);
+				prompt = Encoding.UTF8.GetString(data);
+			}
+			finally
+			{
+				ArrayPool<byte>.Shared.Return(buffer);
+			}
+
+			(bool, string[]) r = authenticationProvider(null, new[] { (prompt, (string)null, true) });
+			if (!r.Item1 || string.IsNullOrEmpty(r.Item2[0]))
+			{
+				int e = -1;
+				MemoryMarshal.Write(intBuffer, ref e);
+				pipe.Write(intBuffer);
+				return;
+			}
+
+			byte[] bytes = Encoding.UTF8.GetBytes(r.Item2[0]);
+			try
+			{
+				byte[] encrypted = AesGcmHelper.Encrypt(bytes, key);
+				try
+				{
+					int len = encrypted.Length;
+					MemoryMarshal.Write(intBuffer, ref len);
+					pipe.Write(intBuffer);
+					pipe.Write(encrypted);
+				}
+				finally
+				{
+					encrypted.AsSpan().Clear();
+				}
+			}
+			finally
+			{
+				bytes.AsSpan().Clear();
+			}
+		}
+
+		private static void HandleProgress(Action<string, double> progress, DataReceivedEventArgs args, ref long lastProgress)
+		{
+			if (progress == null)
+				return;
+
+			string line = args.Data;
+
+			// check if line contains progress data
+			if (string.IsNullOrEmpty(line))
+				return;
+			int stepEnd = line.LastIndexOf(':');
+			if (stepEnd == -1)
+				return;
+			Match progressData = ProgressRegex.Match(line, stepEnd);
+			if (!progressData.Success)
+				return;
+
+			//parse current and total
+			int progressSplitter = line.IndexOf('/', progressData.Index, progressData.Length);
+			if (progressSplitter == -1)
+				return;
+			bool currentParsed = long.TryParse(line.AsSpan(progressData.Index, progressSplitter - progressData.Index), out long currentProgress);
+			if (!currentParsed || currentProgress == lastProgress)
+				return;
+			bool totalParsed = long.TryParse(line.AsSpan(progressSplitter + 1, progressData.Length + progressData.Index - progressSplitter - 1), out long total);
+			if (!totalParsed)
+				return;
+			lastProgress = currentProgress;
+
+			// call the progress callbacks
+			progress(line.Substring(0, stepEnd), (double)currentProgress / total);
+		}
+
+		private static void SetupEnvironment(NamedPipeServerStream pipe, Process process, string pipeName, byte[] key)
+		{
+			if (pipe != null)
+			{
+				string askpass = Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "Yaggi.Askpass*").First(s =>
+				{
+					return Path.GetExtension(s).ToLowerInvariant() switch
+					{
+						".dll" => false,
+						".so" => false,
+						".dylib" => false,
+						".json" => false,
+						".pdb" => false,
+						_ => true
+					};
+				});
+				process.StartInfo.Environment["YAGGI_PIPE"] = pipeName;
+
+				Span<byte> keyKey = stackalloc byte[32];
+				ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
+				Span<ulong> keyKeyUlongs = MemoryMarshal.Cast<byte, ulong>(keyKey.Slice(0, sizeof(ulong) * 2));
+				keyKeyUlongs[0] = time;
+				keyKeyUlongs[1] = time;
+				Span<uint> keyKeyUInts = MemoryMarshal.Cast<byte, uint>(keyKey.Slice(sizeof(ulong) * 2, sizeof(uint) * 4));
+				keyKeyUInts[0] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG"));
+				keyKeyUInts[1] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+				keyKeyUInts[2] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
+				keyKeyUInts[3] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
+
+				byte[] keyEncrypted = AesGcmHelper.Encrypt(key, keyKey);
+				process.StartInfo.Environment["YAGGI_KEY"] = keyEncrypted.ToHex();
+				keyEncrypted.AsSpan().Clear();
+				keyKey.Clear();
+
+				process.StartInfo.Environment["GIT_ASKPASS"] = askpass;
+				process.StartInfo.Environment["SSH_ASKPASS"] = askpass;
+				process.StartInfo.Environment["SSH_ASKPASS_REQUIRE"] = "force";
+				if (!process.StartInfo.Environment.ContainsKey("DISPLAY") || string.IsNullOrEmpty(process.StartInfo.Environment["DISPLAY"]))
+					process.StartInfo.Environment["DISPLAY"] = ":0.0";
+			}
+
+			process.StartInfo.Environment["GIT_TERMINAL_PROMPT"] = "0";
+			process.StartInfo.Environment["GIT_FLUSH"] = "1";
+			process.StartInfo.Environment["GCM_INTERACTIVE"] = "Always";
+			process.StartInfo.Environment["GCM_MODAL_PROMPT"] = "true";
+			process.StartInfo.Environment["GCM_VALIDATE"] = "true";
 		}
 
 		protected override void Dispose(bool disposing) { }
