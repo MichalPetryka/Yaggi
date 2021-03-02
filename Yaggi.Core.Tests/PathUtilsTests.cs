@@ -33,14 +33,14 @@ namespace Yaggi.Core.Tests
 				else
 				{
 					string lower = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToLowerInvariant());
-					if (lower != file)
+					if (!File.Exists(lower))
 						Assert.ThrowsAny<Exception>(() =>
 						{
 							_ = PathUtils.NormalizeFilePath(lower);
 						});
 
 					string upper = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToUpperInvariant());
-					if (upper != file)
+					if (!File.Exists(upper))
 						Assert.ThrowsAny<Exception>(() =>
 						{
 							_ = PathUtils.NormalizeFilePath(upper);
@@ -68,14 +68,14 @@ namespace Yaggi.Core.Tests
 				else
 				{
 					string lower = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToLowerInvariant());
-					if (lower != directory)
+					if (!Directory.Exists(lower))
 						Assert.ThrowsAny<Exception>(() =>
 						{
 							_ = PathUtils.NormalizeDirectoryPath(lower);
 						});
 
 					string upper = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToUpperInvariant());
-					if (upper != directory)
+					if (!Directory.Exists(upper))
 						Assert.ThrowsAny<Exception>(() =>
 						{
 							_ = PathUtils.NormalizeDirectoryPath(upper);
