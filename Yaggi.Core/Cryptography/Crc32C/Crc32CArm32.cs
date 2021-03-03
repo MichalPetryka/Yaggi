@@ -7,7 +7,7 @@ namespace Yaggi.Core.Cryptography.Crc32C
 	{
 		public static bool Supported => System.Runtime.Intrinsics.Arm.Crc32.IsSupported;
 
-		internal Crc32CArm32() : base(0x82F63B78)
+		internal Crc32CArm32() : base(Crc32CPolynomial)
 		{
 			if (!Supported)
 				throw new PlatformNotSupportedException();

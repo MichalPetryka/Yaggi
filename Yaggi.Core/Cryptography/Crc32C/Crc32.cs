@@ -6,16 +6,19 @@ namespace Yaggi.Core.Cryptography.Crc32C
 {
 	public abstract class Crc
 	{
+		internal const uint Crc32Polynomial = 0xEDB88320;
+		internal const uint Crc32CPolynomial = 0x82F63B78;
+
 		public uint Polynomial { get; }
 
-		public static readonly Crc Crc32 = Create(0xEDB88320);
-		public static readonly Crc Crc32C = Create(0x82F63B78);
+		public static readonly Crc Crc32 = Create(Crc32Polynomial);
+		public static readonly Crc Crc32C = Create(Crc32CPolynomial);
 
 		public static Crc Create(uint polynomial)
 		{
 			switch (polynomial)
 			{
-				case 0x82F63B78:
+				case Crc32CPolynomial:
 					if (Crc32CHardware.Supported)
 						return new Crc32CHardware();
 
@@ -34,7 +37,7 @@ namespace Yaggi.Core.Cryptography.Crc32C
 					if (Crc32CSoftware.Supported)
 						return new Crc32CSoftware();
 					break;
-				case 0xEDB88320:
+				case Crc32Polynomial:
 					if (Crc32Zlib.Supported)
 						return new Crc32Zlib();
 

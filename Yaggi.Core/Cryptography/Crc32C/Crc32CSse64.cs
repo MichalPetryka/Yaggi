@@ -8,7 +8,7 @@ namespace Yaggi.Core.Cryptography.Crc32C
 	{
 		public static bool Supported => Sse42.IsSupported && Sse42.X64.IsSupported;
 
-		internal Crc32CSse64() : base(0x82F63B78)
+		internal Crc32CSse64() : base(Crc32CPolynomial)
 		{
 			if (!Supported)
 				throw new PlatformNotSupportedException();

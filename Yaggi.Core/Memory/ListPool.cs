@@ -34,7 +34,10 @@ namespace Yaggi.Core.Memory
 				return list;
 			}
 
-			return new List<T>(enumerable);
+			list = new List<T>(enumerable);
+			if (list.Capacity < DefaultCapacity)
+				list.Capacity = DefaultCapacity;
+			return list;
 		}
 
 		public static void Return(List<T> list)

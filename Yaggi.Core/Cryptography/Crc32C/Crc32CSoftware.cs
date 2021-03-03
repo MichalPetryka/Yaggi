@@ -6,7 +6,7 @@ namespace Yaggi.Core.Cryptography.Crc32C
 	{
 		public static bool Supported => Crc32CNative.Supported;
 
-		internal Crc32CSoftware() : base(0x82F63B78)
+		internal Crc32CSoftware() : base(Crc32CPolynomial)
 		{
 			if (!Supported)
 				throw new PlatformNotSupportedException();

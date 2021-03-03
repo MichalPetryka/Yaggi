@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Yaggi.Core.Marshaling;
 
 namespace Yaggi.Core.Memory
 {
@@ -15,22 +16,7 @@ namespace Yaggi.Core.Memory
 		{
 			try
 			{
-				Module = IntPtr.Zero;
-				foreach (string name in new[] { "zlib1", "libzlib", "libz", "libz.so", "zlib" })
-				{
-					try
-					{
-						Module = NativeLibrary.Load(name);
-						break;
-					}
-					catch
-					{
-						// ignore
-					}
-				}
-
-				if (Module == IntPtr.Zero)
-					throw new PlatformNotSupportedException();
+				Module = NativeLibraryUtils.LoadAny("zlib1", "libzlib", "libz", "libz.so", "zlib");
 
 				delegate* unmanaged[Cdecl]<IntPtr> export = (delegate* unmanaged[Cdecl]<IntPtr>)NativeLibrary.GetExport(Module, "zlibVersion");
 

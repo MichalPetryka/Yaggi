@@ -7,7 +7,7 @@ namespace Yaggi.Core.Cryptography.Crc32C
 	{
 		public static bool Supported => ZlibNative.Supported;
 
-		internal Crc32Zlib() : base(0xEDB88320)
+		internal Crc32Zlib() : base(Crc32Polynomial)
 		{
 			if (!Supported)
 				throw new PlatformNotSupportedException();
