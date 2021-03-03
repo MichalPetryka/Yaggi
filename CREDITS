@@ -1,0 +1,3 @@
+This software uses the following thirdy-party code:
+
+- commandline argument escaping from .NET, by .NET Foundation and Contributors, licensed under MIT (https://github.com/dotnet/runtime)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Yaggi.Core.IO;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
@@ -14,7 +15,9 @@ namespace Yaggi.Core.Git.GitCommandline
 			{
 				if (string.IsNullOrWhiteSpace(value))
 					throw new ArgumentException("Invalid new branch name", nameof(value));
-				CommandlineUtils.CreateProcess("git", $"remote rename \"{_name}\" \"{value}\"", Encoding.UTF8, Repository.Path);
+				CommandlineUtils.CreateProcess("git",
+					$"remote rename {CommandlineUtils.EscapeArgument(_name)} {CommandlineUtils.EscapeArgument(value)}",
+					Encoding.UTF8, Repository.Path);
 				Repository.RenameRemote(_name, value);
 				_name = value;
 			}
@@ -24,14 +27,17 @@ namespace Yaggi.Core.Git.GitCommandline
 		{
 			get
 			{
-				CommandlineUtils.CreateProcess("git", $"remote get-url \"{_name}\"", Encoding.UTF8, out string output, out _, Repository.Path);
+				CommandlineUtils.CreateProcess("git", $"remote get-url {CommandlineUtils.EscapeArgument(_name)}",
+					Encoding.UTF8, out string output, out _, Repository.Path);
 				return output.Trim();
 			}
 			set
 			{
 				if (string.IsNullOrWhiteSpace(value))
 					throw new ArgumentException("Invalid new url", nameof(value));
-				CommandlineUtils.CreateProcess("git", $"remote set-url \"{_name}\" \"{value}\"", Encoding.UTF8, Repository.Path);
+				CommandlineUtils.CreateProcess("git",
+					$"remote set-url {CommandlineUtils.EscapeArgument(_name)} {CommandlineUtils.EscapeArgument(value)}",
+					Encoding.UTF8, Repository.Path);
 			}
 		}
 

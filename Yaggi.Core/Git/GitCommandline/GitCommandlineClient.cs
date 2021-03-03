@@ -15,7 +15,8 @@ namespace Yaggi.Core.Git.GitCommandline
 		{
 			Directory.CreateDirectory(path);
 			path = PathUtils.NormalizeDirectoryPath(path);
-			CommandlineUtils.CreateProcess("git", $"init --initial-branch=\"{branchName}\"", Encoding.UTF8, path);
+			CommandlineUtils.CreateProcess("git",
+				$"init --initial-branch={CommandlineUtils.EscapeArgument(branchName)}", Encoding.UTF8, path);
 			return new GitCommandlineRepository(path);
 		}
 
@@ -24,7 +25,8 @@ namespace Yaggi.Core.Git.GitCommandline
 			Directory.CreateDirectory(path);
 			path = PathUtils.NormalizeDirectoryPath(path);
 			long lastProgress = 0;
-			CommandlineUtils.CreateProcess("git", $"clone{(progress != null ? " --progress" : "")} -- \"{url}\" \"{path}\"",
+			CommandlineUtils.CreateProcess("git",
+				$"clone{(progress != null ? " --progress" : "")} -- {CommandlineUtils.EscapeArgument(url)} {CommandlineUtils.EscapeArgument(path)}",
 				Encoding.UTF8, path,
 				errorData: progress == null ? null : line =>
 			{

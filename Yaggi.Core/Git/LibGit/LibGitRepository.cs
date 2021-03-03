@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
-using Yaggi.Core.Git.LibGit.Bindings.Enums;
+using Yaggi.Core.Git.LibGit.Bindings.Structures;
 
 namespace Yaggi.Core.Git.LibGit
 {
