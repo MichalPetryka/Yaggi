@@ -15,23 +15,28 @@ namespace Yaggi.Askpass
 {
 	internal class Program
 	{
-		private static int Main()
+		private static int Main(string[] args)
 		{
 #if !DEBUG
 			ProcessDescriptors.SecureProcess();
 #endif
-			string[] args = Environment.GetCommandLineArgs();
 			// GIT/SSH always invoke with one parameter containing the prompt
-			if (args.Length < 2)
+			if (args.Length < 1)
 				return 1;
 
 			string pipeName = Environment.GetEnvironmentVariable("YAGGI_PIPE");
 			if (string.IsNullOrEmpty(pipeName))
 				return 2;
-			string k = Environment.GetEnvironmentVariable("YAGGI_KEY");
+			string key = Environment.GetEnvironmentVariable("YAGGI_KEY");
+			// ReSharper disable once ConvertIfStatementToReturnStatement
 			if (string.IsNullOrEmpty(pipeName))
 				return 4;
 
+			return SendRequest(key, pipeName, args[0]);
+		}
+
+		private static int SendRequest(string k, string pipeName, string prompt)
+		{
 			byte[] key = DecryptKey(k, pipeName);
 
 			try
@@ -43,7 +48,7 @@ namespace Yaggi.Askpass
 					{
 						using (NamedPipeClientStream pipe = new(".", pipeName, PipeDirection.InOut))
 						{
-							return ProcessPipe(pipe, args[1], key);
+							return ProcessPipe(pipe, prompt, key);
 						}
 					}
 					finally
@@ -64,16 +69,7 @@ namespace Yaggi.Askpass
 			Span<byte> keyKey = stackalloc byte[32];
 			try
 			{
-				ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
-				Span<ulong> keyKeyUlongs = MemoryMarshal.Cast<byte, ulong>(keyKey.Slice(0, sizeof(ulong) * 2));
-				keyKeyUlongs[0] = time;
-				keyKeyUlongs[1] = time;
-				Span<uint> keyKeyUInts = MemoryMarshal.Cast<byte, uint>(keyKey.Slice(sizeof(ulong) * 2, sizeof(uint) * 4));
-				keyKeyUInts[0] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG"));
-				keyKeyUInts[1] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-				keyKeyUInts[2] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
-				keyKeyUInts[3] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
-
+				GeneratePseudokey(pipeName, keyKey);
 				return AesGcmHelper.Decrypt(keyEncrypted, keyKey);
 			}
 			finally
@@ -81,6 +77,19 @@ namespace Yaggi.Askpass
 				keyKey.Clear();
 				keyEncrypted.AsSpan().Clear();
 			}
+		}
+
+		private static void GeneratePseudokey(string pipeName, Span<byte> keyKey)
+		{
+			ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
+			Span<ulong> keyKeyUlongs = MemoryMarshal.Cast<byte, ulong>(keyKey.Slice(0, sizeof(ulong) * 2));
+			keyKeyUlongs[0] = time;
+			keyKeyUlongs[1] = time;
+			Span<uint> keyKeyUInts = MemoryMarshal.Cast<byte, uint>(keyKey.Slice(sizeof(ulong) * 2, sizeof(uint) * 4));
+			keyKeyUInts[0] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG"));
+			keyKeyUInts[1] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+			keyKeyUInts[2] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
+			keyKeyUInts[3] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
 		}
 
 		private static int ProcessPipe(NamedPipeClientStream pipe, string prompt, byte[] key)
@@ -93,6 +102,7 @@ namespace Yaggi.Askpass
 			MemoryMarshal.Write(intBuffer, ref l);
 			pipe.Write(intBuffer);
 			pipe.Write(promptBytes);
+
 			pipe.Read(intBuffer);
 			int length = MemoryMarshal.Read<int>(intBuffer);
 			// negative length means that the dialog was cancelled

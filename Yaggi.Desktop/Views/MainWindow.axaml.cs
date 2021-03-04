@@ -24,12 +24,11 @@ namespace Yaggi.Desktop.Views
 				using (GitClient client = new GitCommandlineClient())
 				{
 					client.CloneRepository(@"I:\test", @"git@github.com:MichalPetryka/Yaggi.git",
-						(s, d) => Debug.WriteLine($"{s} {d:P}"), (s, tuples) =>
+						(s, d) => Debug.WriteLine($"{s} {d:P}"), (title, inputs) =>
 						{
-							string[] a = InputDialog.Show(s, s,
-								tuples.Select(tuple => new InputDialogEntry(tuple.Item1, tuple.Item2, tuple.Item3))
-									.ToArray());
-							return (a != null, a);
+							string[] responses = InputDialog.Show(title, title,
+								inputs.Select(input => new InputDialogEntry(input.prompt, input.defaultValue, input.confidential)));
+							return (responses != null, responses);
 						}).Dispose();
 				}
 			});*/

@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Yaggi.Desktop.Extensions;
@@ -63,6 +64,29 @@ namespace Yaggi.Desktop.Dialogs
 		///
 		/// <param name="title">Title of the dialog</param>
 		/// <param name="header">Header of the dialog</param>
+		/// <param name="inputEntries">Input entries</param>
+		/// <returns>
+		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
+		/// null if user clicked cancel or closed the window
+		/// </returns>
+		public static Task<string[]> ShowAsync(string title, string header, IEnumerable<InputDialogEntry> inputEntries) =>
+			ShowAsync(title, header, inputEntries.ToArray());
+
+		/// <summary>
+		/// Shows dialog and returns user input
+		/// </summary>
+		/// <code>
+		/// var output = await Dialogs.InputDialog.Show(
+		///		"Window Title",
+		///		"Dialog header",
+		///		new Dialogs.InputDialogEntry[] {
+		///			new Dialogs.InputDialogEntry("Input 1", false),
+		///			new Dialogs.InputDialogEntry("Input 2", true),
+		///	});
+		/// </code>
+		///
+		/// <param name="title">Title of the dialog</param>
+		/// <param name="header">Header of the dialog</param>
 		/// <param name="inputEntries">Array of Input entries</param>
 		/// <returns>
 		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
@@ -83,6 +107,29 @@ namespace Yaggi.Desktop.Dialogs
 
 			return dlg.ShowDialog<string[]>();
 		}
+
+		/// <summary>
+		/// Shows dialog synchronously and returns user input
+		/// </summary>
+		/// <code>
+		/// var output = Dialogs.InputDialog.ShowSync(
+		///		"Window Title",
+		///		"Dialog header",
+		///		new Dialogs.InputDialogEntry[] {
+		///			new Dialogs.InputDialogEntry("Input 1", false),
+		///			new Dialogs.InputDialogEntry("Input 2", true),
+		///	});
+		/// </code>
+		///
+		/// <param name="title">Title of the dialog</param>
+		/// <param name="header">Header of the dialog</param>
+		/// <param name="inputEntries">Input entries</param>
+		/// <returns>
+		/// Array of user inputs (length of that array is equal to <paramref name="inputEntries"/>)<br/>
+		/// null if user clicked cancel or closed the window
+		/// </returns>
+		public static string[] Show(string title, string header, IEnumerable<InputDialogEntry> inputEntries) =>
+			Show(title, header, inputEntries.ToArray());
 
 		/// <summary>
 		/// Shows dialog synchronously and returns user input

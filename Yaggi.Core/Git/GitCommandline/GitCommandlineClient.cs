@@ -29,7 +29,7 @@ namespace Yaggi.Core.Git.GitCommandline
 			return new GitCommandlineRepository(path);
 		}
 
-		public override GitRepository CloneRepository(string path, string url, Action<string, double> progress = null, Func<string, (string, string, bool)[], (bool, string[])> authenticationProvider = null)
+		public override GitRepository CloneRepository(string path, string url, Action<string, double> progress = null, AuthenticationProviderCallback authenticationProvider = null)
 		{
 			Directory.CreateDirectory(path);
 			path = PathUtils.NormalizeDirectoryPath(path);
@@ -71,64 +71,7 @@ namespace Yaggi.Core.Git.GitCommandline
 					// ReSharper restore AccessToModifiedClosure
 				}
 
-				const string git = "git";
-				string arguments = $"clone{(progress != null ? " --progress" : "")} --verbose -- {CommandlineUtils.EscapeArgument(url)} {CommandlineUtils.EscapeArgument(path)}";
-				using (Process process = new()
-				{
-					StartInfo = new ProcessStartInfo(git, arguments)
-					{
-						UseShellExecute = false,
-						CreateNoWindow = true,
-						RedirectStandardOutput = true,
-						RedirectStandardError = true,
-						StandardOutputEncoding = Encoding.UTF8,
-						StandardErrorEncoding = Encoding.UTF8,
-						WorkingDirectory = path
-					}
-				})
-				{
-					SetupEnvironment(pipe, process, pipeName, key);
-
-					object outputLock = new();
-					StringBuilder outputBuilder = new();
-
-					object errorLock = new();
-					StringBuilder errorBuilder = new();
-
-					process.OutputDataReceived += (_, args) =>
-					{
-						lock (outputLock)
-						{
-							outputBuilder.AppendLine(args.Data);
-						}
-					};
-
-					long lastProgress = 0;
-					process.ErrorDataReceived += (_, args) =>
-					{
-						lock (errorLock)
-						{
-							errorBuilder.AppendLine(args.Data);
-							HandleProgress(progress, args, ref lastProgress);
-						}
-					};
-
-					process.Start();
-
-					process.BeginOutputReadLine();
-					process.BeginErrorReadLine();
-
-					process.WaitForExit();
-
-					string output;
-					lock (outputLock)
-						output = outputBuilder.ToString().Trim();
-					string error;
-					lock (errorLock)
-						error = errorBuilder.ToString().Trim();
-					if (process.ExitCode != 0)
-						throw new ProcessException($"{git} {arguments}", process.ExitCode, output, error);
-				}
+				StartClone(path, url, progress, pipe, pipeName, key);
 				return new GitCommandlineRepository(path);
 			}
 			finally
@@ -142,7 +85,67 @@ namespace Yaggi.Core.Git.GitCommandline
 			}
 		}
 
-		private static void ProcessPipeConnection(Func<string, (string, string, bool)[], (bool, string[])> authenticationProvider, NamedPipeServerStream pipe, byte[] key)
+		private static void StartClone(string path, string url, Action<string, double> progress, NamedPipeServerStream pipe, string pipeName, byte[] key)
+		{
+			const string git = "git";
+			string arguments = $"clone{(progress != null ? " --progress" : "")} --verbose -- {CommandlineUtils.EscapeArgument(url)} {CommandlineUtils.EscapeArgument(path)}";
+			using (Process process = new()
+			{
+				StartInfo = new ProcessStartInfo(git, arguments)
+				{
+					UseShellExecute = false,
+					CreateNoWindow = true,
+					RedirectStandardOutput = true,
+					RedirectStandardError = true,
+					StandardOutputEncoding = Encoding.UTF8,
+					StandardErrorEncoding = Encoding.UTF8,
+					WorkingDirectory = path
+				}
+			})
+			{
+				SetupEnvironment(pipe, process, pipeName, key);
+
+				object outputLock = new();
+				StringBuilder outputBuilder = new();
+
+				object errorLock = new();
+				StringBuilder errorBuilder = new();
+
+				process.OutputDataReceived += (_, args) =>
+				{
+					lock (outputLock)
+						outputBuilder.AppendLine(args.Data);
+				};
+
+				long lastProgress = 0;
+				process.ErrorDataReceived += (_, args) =>
+				{
+					lock (errorLock)
+					{
+						errorBuilder.AppendLine(args.Data);
+						HandleProgress(progress, args.Data, ref lastProgress);
+					}
+				};
+
+				process.Start();
+
+				process.BeginOutputReadLine();
+				process.BeginErrorReadLine();
+
+				process.WaitForExit();
+
+				string output;
+				lock (outputLock)
+					output = outputBuilder.ToString().Trim();
+				string error;
+				lock (errorLock)
+					error = errorBuilder.ToString().Trim();
+				if (process.ExitCode != 0)
+					throw new ProcessException($"{git} {arguments}", process.ExitCode, output, error);
+			}
+		}
+
+		private static void ProcessPipeConnection(AuthenticationProviderCallback authenticationProvider, NamedPipeServerStream pipe, byte[] key)
 		{
 			Span<byte> intBuffer = stackalloc byte[sizeof(int)];
 			pipe.Read(intBuffer);
@@ -160,8 +163,8 @@ namespace Yaggi.Core.Git.GitCommandline
 				ArrayPool<byte>.Shared.Return(buffer);
 			}
 
-			(bool, string[]) r = authenticationProvider(null, new[] { (prompt, (string)null, true) });
-			if (!r.Item1 || string.IsNullOrEmpty(r.Item2[0]))
+			(bool successful, string[] responses) = authenticationProvider(null, (prompt, (string)null, true));
+			if (!successful || string.IsNullOrEmpty(responses[0]))
 			{
 				int e = -1;
 				MemoryMarshal.Write(intBuffer, ref e);
@@ -169,7 +172,7 @@ namespace Yaggi.Core.Git.GitCommandline
 				return;
 			}
 
-			byte[] bytes = Encoding.UTF8.GetBytes(r.Item2[0]);
+			byte[] bytes = Encoding.UTF8.GetBytes(responses[0]);
 			try
 			{
 				byte[] encrypted = AesGcmHelper.Encrypt(bytes, key);
@@ -191,15 +194,10 @@ namespace Yaggi.Core.Git.GitCommandline
 			}
 		}
 
-		private static void HandleProgress(Action<string, double> progress, DataReceivedEventArgs args, ref long lastProgress)
+		private static void HandleProgress(Action<string, double> progress, string line, ref long lastProgress)
 		{
-			if (progress == null)
-				return;
-
-			string line = args.Data;
-
 			// check if line contains progress data
-			if (string.IsNullOrEmpty(line))
+			if (progress == null || string.IsNullOrEmpty(line))
 				return;
 			int stepEnd = line.LastIndexOf(':');
 			if (stepEnd == -1)
@@ -243,16 +241,7 @@ namespace Yaggi.Core.Git.GitCommandline
 				process.StartInfo.Environment["YAGGI_PIPE"] = pipeName;
 
 				Span<byte> keyKey = stackalloc byte[32];
-				ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
-				Span<ulong> keyKeyUlongs = MemoryMarshal.Cast<byte, ulong>(keyKey.Slice(0, sizeof(ulong) * 2));
-				keyKeyUlongs[0] = time;
-				keyKeyUlongs[1] = time;
-				Span<uint> keyKeyUInts = MemoryMarshal.Cast<byte, uint>(keyKey.Slice(sizeof(ulong) * 2, sizeof(uint) * 4));
-				keyKeyUInts[0] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG"));
-				keyKeyUInts[1] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
-				keyKeyUInts[2] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
-				keyKeyUInts[3] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
-
+				GeneratePseudokey(pipeName, keyKey);
 				byte[] keyEncrypted = AesGcmHelper.Encrypt(key, keyKey);
 				process.StartInfo.Environment["YAGGI_KEY"] = keyEncrypted.ToHex();
 				keyEncrypted.AsSpan().Clear();
@@ -270,6 +259,19 @@ namespace Yaggi.Core.Git.GitCommandline
 			process.StartInfo.Environment["GCM_INTERACTIVE"] = "Always";
 			process.StartInfo.Environment["GCM_MODAL_PROMPT"] = "true";
 			process.StartInfo.Environment["GCM_VALIDATE"] = "true";
+		}
+
+		private static void GeneratePseudokey(string pipeName, Span<byte> keyKey)
+		{
+			ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
+			Span<ulong> keyKeyUlongs = MemoryMarshal.Cast<byte, ulong>(keyKey.Slice(0, sizeof(ulong) * 2));
+			keyKeyUlongs[0] = time;
+			keyKeyUlongs[1] = time;
+			Span<uint> keyKeyUInts = MemoryMarshal.Cast<byte, uint>(keyKey.Slice(sizeof(ulong) * 2, sizeof(uint) * 4));
+			keyKeyUInts[0] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG"));
+			keyKeyUInts[1] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+			keyKeyUInts[2] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(AppDomain.CurrentDomain.BaseDirectory));
+			keyKeyUInts[3] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
 		}
 
 		protected override void Dispose(bool disposing) { }
