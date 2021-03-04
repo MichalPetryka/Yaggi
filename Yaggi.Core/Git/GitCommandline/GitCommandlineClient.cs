@@ -240,8 +240,14 @@ namespace Yaggi.Core.Git.GitCommandline
 				});
 				process.StartInfo.Environment["YAGGI_PIPE"] = pipeName;
 
+				Span<byte> saltBytes = stackalloc byte[sizeof(ulong)];
+				RandomNumberGenerator.Fill(saltBytes);
+				ulong salt = MemoryMarshal.Cast<byte, ulong>(saltBytes)[0];
+				saltBytes.Clear();
+				process.StartInfo.Environment["YAGGI_SALT"] = salt.ToString();
+
 				Span<byte> keyKey = stackalloc byte[32];
-				GeneratePseudokey(pipeName, keyKey);
+				GeneratePseudokey(pipeName, salt, keyKey);
 				byte[] keyEncrypted = AesGcmHelper.Encrypt(key, keyKey);
 				process.StartInfo.Environment["YAGGI_KEY"] = keyEncrypted.ToHex();
 				keyEncrypted.AsSpan().Clear();
@@ -261,12 +267,14 @@ namespace Yaggi.Core.Git.GitCommandline
 			process.StartInfo.Environment["GCM_VALIDATE"] = "true";
 		}
 
-		private static void GeneratePseudokey(string pipeName, Span<byte> keyKey)
+		private static void GeneratePseudokey(string pipeName, ulong salt, Span<byte> keyKey)
 		{
+			// keep a 7 second window in case process start takes a lot of time, shift out 0 bits
 			ulong time = ((ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds() & ~0b111UL) >> 3;
 			Span<ulong> keyKeyUlongs = MemoryMarshal.Cast<byte, ulong>(keyKey.Slice(0, sizeof(ulong) * 2));
 			keyKeyUlongs[0] = time;
-			keyKeyUlongs[1] = time;
+			keyKeyUlongs[1] = salt;
+
 			Span<uint> keyKeyUInts = MemoryMarshal.Cast<byte, uint>(keyKey.Slice(sizeof(ulong) * 2, sizeof(uint) * 4));
 			keyKeyUInts[0] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes("YAGGI ASKPASS DIALOG"));
 			keyKeyUInts[1] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));

@@ -10,11 +10,11 @@ namespace Yaggi.Core.Memory
 		public static string ToHex(this Span<byte> data) => ((ReadOnlySpan<byte>)data).ToHex();
 		public static string ToHex(this ReadOnlySpan<byte> data)
 		{
-			StringBuilder sb = new(data.Length * 2);
+			StringBuilder stringBuilder = new(data.Length * 2);
 			for (int i = 0; i < data.Length; i++)
-				sb.Append(data[i].ToString("X2"));
+				stringBuilder.Append(data[i].ToString("X2"));
 
-			return sb.ToString();
+			return stringBuilder.ToString();
 		}
 
 		public static byte[] FromHex(this string data) => data.AsSpan().FromHex();

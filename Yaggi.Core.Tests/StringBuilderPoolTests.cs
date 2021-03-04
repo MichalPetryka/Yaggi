@@ -9,10 +9,10 @@ namespace Yaggi.Core.Tests
 		[Fact]
 		public void ValidTest()
 		{
-			StringBuilder sb = StringBuilderPool.Rent();
-			Assert.NotNull(sb);
-			Assert.Equal(0, sb.Length);
-			StringBuilderPool.Return(sb);
+			StringBuilder stringBuilder = StringBuilderPool.Rent();
+			Assert.NotNull(stringBuilder);
+			Assert.Equal(0, stringBuilder.Length);
+			StringBuilderPool.Return(stringBuilder);
 		}
 
 		[Theory]
@@ -22,11 +22,11 @@ namespace Yaggi.Core.Tests
 		[InlineData(1024)]
 		public void CapacityTest(int capacity)
 		{
-			StringBuilder sb = StringBuilderPool.Rent(capacity);
-			Assert.NotNull(sb);
-			Assert.Equal(0, sb.Length);
-			Assert.True(sb.Capacity >= capacity);
-			StringBuilderPool.Return(sb);
+			StringBuilder stringBuilder = StringBuilderPool.Rent(capacity);
+			Assert.NotNull(stringBuilder);
+			Assert.Equal(0, stringBuilder.Length);
+			Assert.True(stringBuilder.Capacity >= capacity);
+			StringBuilderPool.Return(stringBuilder);
 		}
 
 		[Theory]
@@ -35,9 +35,9 @@ namespace Yaggi.Core.Tests
 		[InlineData("test \n \0 \r")]
 		public void TextTest(string input)
 		{
-			StringBuilder sb = StringBuilderPool.Rent(input);
-			Assert.Equal(input, sb.ToString());
-			StringBuilderPool.Return(sb);
+			StringBuilder stringBuilder = StringBuilderPool.Rent(input);
+			Assert.Equal(input, stringBuilder.ToString());
+			StringBuilderPool.Return(stringBuilder);
 		}
 
 		[Theory]
@@ -46,8 +46,8 @@ namespace Yaggi.Core.Tests
 		[InlineData("test \n \0 \r")]
 		public void ToStringReturnTest(string input)
 		{
-			StringBuilder sb = StringBuilderPool.Rent(input);
-			Assert.Equal(input, StringBuilderPool.ToStringReturn(sb));
+			StringBuilder stringBuilder = StringBuilderPool.Rent(input);
+			Assert.Equal(input, StringBuilderPool.ToStringReturn(stringBuilder));
 		}
 	}
 }
