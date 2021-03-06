@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using Yaggi.Core.Git.GitCommandline;
 using Yaggi.Core.Memory;
 
 // ReSharper disable HeapView.BoxingAllocation

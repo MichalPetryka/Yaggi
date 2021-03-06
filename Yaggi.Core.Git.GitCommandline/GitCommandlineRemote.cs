@@ -18,7 +18,7 @@ namespace Yaggi.Core.Git.GitCommandline
 				CommandlineUtils.CreateProcess("git",
 					$"remote rename {CommandlineUtils.EscapeArgument(_name)} {CommandlineUtils.EscapeArgument(value)}",
 					Encoding.UTF8, Repository.Path);
-				Repository.RenameRemote(_name, value);
+				RenameRemote(_name, value);
 				_name = value;
 			}
 		}

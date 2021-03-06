@@ -19,6 +19,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Yaggi.Core\Yaggi.Core.csproj" />
+    <ProjectReference Include="..\Yaggi.Core.Git.GitCommandline\Yaggi.Core.Git.GitCommandline.csproj" />
+    <ProjectReference Include="..\Yaggi.Core.Git.LibGit\Yaggi.Core.Git.Libgit.csproj" />
     <ProjectReference Include="..\Yaggi.Askpass\Yaggi.Askpass.csproj" />
   </ItemGroup>
   <Target Name="CopyRuntimeConfigsBuild" BeforeTargets="Build">
