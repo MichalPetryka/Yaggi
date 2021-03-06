@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitRepositoryInitMode : uint
+	internal enum GitRepositoryInitMode : uint
 	{
 		SharedUmask = 0,
 		SharedGroup = 0002775,

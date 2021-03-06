@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
 	[Flags]
-	public enum GitFeature
+	internal enum GitFeature
 	{
 		Threads = 1 << 0,
 		Https = 1 << 1,

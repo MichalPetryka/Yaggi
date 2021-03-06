@@ -5,10 +5,14 @@ using Yaggi.Core.Git.LibGit.Bindings.Structures;
 
 namespace Yaggi.Core.Git.LibGit
 {
+	/// <summary>
+	/// LibGit2 remote implementation
+	/// </summary>
 	public unsafe class LibGitRemote : GitRemote
 	{
 		private string _name;
 
+		/// <inheritdoc/>
 		public override string Name
 		{
 			get => _name;
@@ -38,6 +42,7 @@ namespace Yaggi.Core.Git.LibGit
 			}
 		}
 
+		/// <inheritdoc/>
 		public override string Url
 		{
 			get
@@ -56,6 +61,7 @@ namespace Yaggi.Core.Git.LibGit
 			set => ThrowHelper.ThrowOnError(GitNative.SetRemoteUrl(Repository.Handle, _name, value));
 		}
 
+		/// <inheritdoc/>
 		public override LibGitRepository Repository { get; }
 
 		internal LibGitRemote(string name, LibGitRepository repository) : base(repository)

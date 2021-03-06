@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
 	[Flags]
-	public enum GitRepositoryInitFlag : uint
+	internal enum GitRepositoryInitFlag : uint
 	{
 		Bare = 1u << 0,
 		NoReinit = 1u << 1,

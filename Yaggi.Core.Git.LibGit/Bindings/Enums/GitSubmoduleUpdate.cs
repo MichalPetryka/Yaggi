@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitSubmoduleUdate
+	internal enum GitSubmoduleUpdate
 	{
 		Checkout = 1,
 		Rebase = 2,

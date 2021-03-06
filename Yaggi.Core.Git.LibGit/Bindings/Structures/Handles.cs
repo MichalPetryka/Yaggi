@@ -3,125 +3,125 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitOdb { }
+	internal readonly struct GitOdb { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitOdbBackend { }
+	internal readonly struct GitOdbBackend { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitOdbObject { }
+	internal readonly struct GitOdbObject { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitOdbStream { }
+	internal readonly struct GitOdbStream { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitOdbWritepack { }
+	internal readonly struct GitOdbWritepack { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRefDb { }
+	internal readonly struct GitRefDb { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRefDbBackend { }
+	internal readonly struct GitRefDbBackend { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRepository { }
+	internal readonly struct GitRepository { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitWorktree { }
+	internal readonly struct GitWorktree { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitObject { }
+	internal readonly struct GitObject { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRevWalk { }
+	internal readonly struct GitRevWalk { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTag { }
+	internal readonly struct GitTag { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitBlob { }
+	internal readonly struct GitBlob { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitCommit { }
+	internal readonly struct GitCommit { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTreeEntry { }
+	internal readonly struct GitTreeEntry { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTree { }
+	internal readonly struct GitTree { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTreeBuilder { }
+	internal readonly struct GitTreeBuilder { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitIndex { }
+	internal readonly struct GitIndex { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitIndexIterator { }
+	internal readonly struct GitIndexIterator { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitIndexConflictIterator { }
+	internal readonly struct GitIndexConflictIterator { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitConfig { }
+	internal readonly struct GitConfig { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitConfigBackend { }
+	internal readonly struct GitConfigBackend { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRefLogEntry { }
+	internal readonly struct GitRefLogEntry { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRefLog { }
+	internal readonly struct GitRefLog { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitNote { }
+	internal readonly struct GitNote { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitPackBuilder { }
+	internal readonly struct GitPackBuilder { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitReference { }
+	internal readonly struct GitReference { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitReferenceIterator { }
+	internal readonly struct GitReferenceIterator { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTransaction { }
+	internal readonly struct GitTransaction { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitAnnotatedCommit { }
+	internal readonly struct GitAnnotatedCommit { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitStatusList { }
+	internal readonly struct GitStatusList { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRebase { }
+	internal readonly struct GitRebase { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRefSpec { }
+	internal readonly struct GitRefSpec { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRemote { }
+	internal readonly struct GitRemote { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTransport { }
+	internal readonly struct GitTransport { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitPush { }
+	internal readonly struct GitPush { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitRemoteHead { }
+	internal readonly struct GitRemoteHead { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitCert { }
+	internal readonly struct GitCert { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitSubmodule { }
+	internal readonly struct GitSubmodule { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitMailMap { }
+	internal readonly struct GitMailMap { }
 
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitCredential { }
+	internal readonly struct GitCredential { }
 }

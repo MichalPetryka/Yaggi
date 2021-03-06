@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
 	[Flags]
-	public enum GitCredentialType : uint
+	internal enum GitCredentialType : uint
 	{
 		UserpassPlaintext = 1u << 0,
 		SshKey = 1u << 1,

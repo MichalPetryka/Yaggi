@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitSignature
+	internal readonly struct GitSignature
 	{
 		[MarshalAs(UnmanagedType.LPUTF8Str)]
 		public readonly string Name;

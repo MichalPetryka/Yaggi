@@ -5,8 +5,17 @@ using Yaggi.Core.Memory;
 
 namespace Yaggi.Core.Marshaling
 {
+	/// <summary>
+	/// Provides utility methods for working with native libraries
+	/// </summary>
 	public static class NativeLibraryUtils
 	{
+		/// <summary>
+		/// Loads any of provided library names
+		/// </summary>
+		/// <param name="names">Library names</param>
+		/// <returns>Pointer to loaded module</returns>
+		/// <exception cref="AggregateException">Thrown when none of names could be loaded</exception>
 		public static IntPtr LoadAny(params string[] names)
 		{
 			if (names == null)

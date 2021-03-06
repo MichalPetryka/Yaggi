@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitFilemode
+	internal enum GitFilemode
 	{
 		Unreadable = 0000000,
 		Tree = 0040000,

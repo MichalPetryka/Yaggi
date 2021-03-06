@@ -5,7 +5,7 @@ using Yaggi.Core.Git.LibGit.Bindings.Enums;
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct GitRepositoryInitOptions
+	internal struct GitRepositoryInitOptions
 	{
 		public uint version;
 		public GitRepositoryInitFlag flags;

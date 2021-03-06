@@ -2,7 +2,7 @@
 
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
-	public struct GitBuf
+	internal struct GitBuf
 	{
 		public IntPtr ptr;
 		public nuint asize;

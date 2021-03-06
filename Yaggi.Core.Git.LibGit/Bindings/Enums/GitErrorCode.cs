@@ -1,5 +1,8 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
+	/// <summary>
+	/// LibGit error code, errors are always negative
+	/// </summary>
 	public enum GitErrorCode
 	{
 		/// <summary>

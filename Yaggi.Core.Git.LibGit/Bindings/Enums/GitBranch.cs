@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitBranch
+	internal enum GitBranch
 	{
 		Local = 1,
 		Remote = 2,

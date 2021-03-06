@@ -4,10 +4,14 @@ using Yaggi.Core.IO;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
+	/// <summary>
+	/// Git remote representation for the commandline git client
+	/// </summary>
 	public class GitCommandlineRemote : GitRemote
 	{
 		private string _name;
 
+		/// <inheritdoc/>
 		public override string Name
 		{
 			get => _name;
@@ -23,6 +27,7 @@ namespace Yaggi.Core.Git.GitCommandline
 			}
 		}
 
+		/// <inheritdoc/>
 		public override string Url
 		{
 			get

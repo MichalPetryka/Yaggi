@@ -5,7 +5,7 @@ using Yaggi.Core.Git.LibGit.Bindings.Enums;
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct GitProxyOptions
+	internal struct GitProxyOptions
 	{
 		public uint version;
 		public GitProxy type;

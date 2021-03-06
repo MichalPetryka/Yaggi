@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitCloneLocal
+	internal enum GitCloneLocal
 	{
 		LocalAuto,
 		Local,
