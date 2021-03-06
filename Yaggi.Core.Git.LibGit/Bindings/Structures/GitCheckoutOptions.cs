@@ -5,7 +5,7 @@ using Yaggi.Core.Git.LibGit.Bindings.Enums;
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public unsafe struct GitCheckoutOptions
+	internal unsafe struct GitCheckoutOptions
 	{
 		public uint version;
 		public GitCheckoutStrategy checkoutStrategy;

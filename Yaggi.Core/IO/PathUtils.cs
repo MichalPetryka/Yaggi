@@ -7,11 +7,19 @@ using System.Runtime.InteropServices;
 
 namespace Yaggi.Core.IO
 {
+	/// <summary>
+	/// Provides utility methods for working with filesystem paths
+	/// </summary>
 	public static unsafe class PathUtils
 	{
 		private static readonly IntPtr InvalidHandle = new(-1);
 		private const int MaxPath = 4096;
 
+		/// <summary>
+		/// Verifies the path validity and provides possibly the most normalized version of it, including casing.
+		/// </summary>
+		/// <param name="path">Checked file path</param>
+		/// <returns>Normalized path</returns>
 		public static string NormalizeFilePath(string path)
 		{
 			if (path == null)
@@ -26,6 +34,12 @@ namespace Yaggi.Core.IO
 			return path;
 		}
 
+
+		/// <summary>
+		/// Verifies the path validity and provides possibly the most normalized version of it, including casing.
+		/// </summary>
+		/// <param name="path">Checked directory path</param>
+		/// <returns>Normalized path</returns>
 		public static string NormalizeDirectoryPath(string path)
 		{
 			if (path == null)

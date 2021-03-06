@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public readonly struct GitTime
+	internal readonly struct GitTime
 	{
 		public readonly long Time;
 		public readonly int Offset;

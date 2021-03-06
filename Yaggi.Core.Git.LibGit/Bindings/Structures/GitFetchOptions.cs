@@ -4,7 +4,7 @@ using Yaggi.Core.Git.LibGit.Bindings.Enums;
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct GitFetchOptions
+	internal struct GitFetchOptions
 	{
 		public int version;
 		public GitRemoteCallbacks callbacks;

@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace Yaggi.Desktop.Extensions
 {
+	/// <summary>
+	/// Provides extension methods for working with dialogs
+	/// </summary>
 	public static class Dialogs
 	{
 		/// <summary>

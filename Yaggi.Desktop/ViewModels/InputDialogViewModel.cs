@@ -7,13 +7,14 @@ using Yaggi.Desktop.Dialogs;
 
 namespace Yaggi.Desktop.ViewModels
 {
+	/// <summary>
+	/// ViewModel of the <see cref="InputDialog"/>
+	/// </summary>
 	public class InputDialogViewModel : ViewModelBase
 	{
 		private AvaloniaList<Control> _items = new();
 		private string _title;
 		private string _header;
-
-		public string Input { get; set; }
 
 		/// <summary>
 		/// Title of the window

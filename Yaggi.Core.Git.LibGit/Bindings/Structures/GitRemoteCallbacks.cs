@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct GitRemoteCallbacks
+	internal struct GitRemoteCallbacks
 	{
 		public uint version;
 		public IntPtr sidebandProgress;

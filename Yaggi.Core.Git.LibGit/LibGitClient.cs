@@ -11,11 +11,17 @@ using Yaggi.Core.Memory;
 
 namespace Yaggi.Core.Git.LibGit
 {
+	/// <summary>
+	/// LibGit2 implementation of a git client
+	/// </summary>
 	public unsafe class LibGitClient : GitClient
 	{
 		private static readonly object LoadLock = new();
 		private bool _valid;
 
+		/// <summary>
+		/// Creates a new client instance
+		/// </summary>
 		public LibGitClient()
 		{
 			lock (LoadLock)
@@ -25,6 +31,7 @@ namespace Yaggi.Core.Git.LibGit
 			}
 		}
 
+		/// <inheritdoc/>
 		public override GitRepository InitializeRepository(string path, string branchName)
 		{
 			Directory.CreateDirectory(path);
@@ -40,6 +47,7 @@ namespace Yaggi.Core.Git.LibGit
 			}
 		}
 
+		/// <inheritdoc/>
 		public override GitRepository CloneRepository(string path, string url, Action<string, double> progress = null, AuthenticationProviderCallback authenticationProvider = null)
 		{
 			Directory.CreateDirectory(path);
@@ -191,6 +199,7 @@ namespace Yaggi.Core.Git.LibGit
 			return GitErrorCode.User;
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			lock (LoadLock)

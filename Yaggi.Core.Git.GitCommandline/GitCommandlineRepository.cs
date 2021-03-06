@@ -4,10 +4,14 @@ using Yaggi.Core.IO;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
+	/// <summary>
+	/// Git repository implementation for the git commandline client
+	/// </summary>
 	public class GitCommandlineRepository : GitRepository
 	{
 		internal GitCommandlineRepository(string path) : base(path) { }
 
+		/// <inheritdoc/>
 		public override GitRemote[] Remotes
 		{
 			get
@@ -22,6 +26,7 @@ namespace Yaggi.Core.Git.GitCommandline
 			}
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing) { }
 	}
 }

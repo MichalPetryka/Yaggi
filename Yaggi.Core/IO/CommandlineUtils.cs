@@ -99,6 +99,11 @@ namespace Yaggi.Core.IO
 			}
 		}
 
+		/// <summary>
+		/// Escapes a string so that it can be used as a commandline argument
+		/// </summary>
+		/// <param name="argument">Unescaped text</param>
+		/// <returns>Escaped text</returns>
 		public static string EscapeArgument(string argument)
 		{
 			if (string.IsNullOrEmpty(argument))

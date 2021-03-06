@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitObject
+	internal enum GitObject
 	{
 		Any = -2,
 		Invalid = -1,

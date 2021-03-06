@@ -6,6 +6,9 @@ using System.Security.Principal;
 
 namespace Yaggi.Core.Security
 {
+	/// <summary>
+	/// Handles process security configuration.
+	/// </summary>
 	public static unsafe class ProcessDescriptors
 	{
 		// ReSharper disable UnusedMember.Local
@@ -63,6 +66,10 @@ namespace Yaggi.Core.Security
 		}
 		// ReSharper restore UnusedMember.Local
 
+		/// <summary>
+		/// On Windows, sets up process security descriptors preventing outside memory access.
+		/// On other systems does nothing.
+		/// </summary>
 		public static void SecureProcess()
 		{
 			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

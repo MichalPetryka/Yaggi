@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitLibGit2Opt
+	internal enum GitLibGit2Opt
 	{
 		GetMwindowSize,
 		SetMwindowSize,

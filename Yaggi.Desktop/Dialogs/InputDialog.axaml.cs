@@ -11,6 +11,9 @@ using Yaggi.Desktop.Extensions;
 
 namespace Yaggi.Desktop.Dialogs
 {
+	/// <summary>
+	/// Input dialog providing multiple fields when needed.
+	/// </summary>
 	public class InputDialog : Window
 	{
 		private string[] _result;
@@ -187,8 +190,17 @@ namespace Yaggi.Desktop.Dialogs
 	/// </summary>
 	public readonly struct InputDialogEntry
 	{
+		/// <summary>
+		/// Input field description
+		/// </summary>
 		public readonly string Label;
+		/// <summary>
+		/// Initial value of the input field
+		/// </summary>
 		public readonly string InitialValue;
+		/// <summary>
+		/// Should the input field content be visible when typing
+		/// </summary>
 		public readonly bool MaskInput;
 
 		/// <summary>

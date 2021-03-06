@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 {
 	[StructLayout(LayoutKind.Sequential)]
-	public struct GitIndexerProgress
+	internal struct GitIndexerProgress
 	{
 		public uint totalObjects;
 		public uint indexedObjects;

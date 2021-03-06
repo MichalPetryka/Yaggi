@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitSubmoduleIgnore
+	internal enum GitSubmoduleIgnore
 	{
 		Unspecified = -1,
 

@@ -15,11 +15,15 @@ using Yaggi.Core.Memory;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
+	/// <summary>
+	/// Git client implementation over the commandline git client
+	/// </summary>
 	public class GitCommandlineClient : GitClient
 	{
 		private static readonly Regex ProgressRegex = new(@"(?<=\()([0-9]+)\/([0-9]+)(?=\))",
 			RegexOptions.Compiled | RegexOptions.CultureInvariant | RegexOptions.IgnoreCase);
 
+		/// <inheritdoc/>
 		public override GitRepository InitializeRepository(string path, string branchName)
 		{
 			Directory.CreateDirectory(path);
@@ -29,6 +33,7 @@ namespace Yaggi.Core.Git.GitCommandline
 			return new GitCommandlineRepository(path);
 		}
 
+		/// <inheritdoc/>
 		public override GitRepository CloneRepository(string path, string url, Action<string, double> progress = null, AuthenticationProviderCallback authenticationProvider = null)
 		{
 			Directory.CreateDirectory(path);
@@ -282,6 +287,7 @@ namespace Yaggi.Core.Git.GitCommandline
 			keyKeyUInts[3] = Crc.Crc32C.Calculate(Encoding.UTF8.GetBytes(pipeName));
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing) { }
 	}
 }

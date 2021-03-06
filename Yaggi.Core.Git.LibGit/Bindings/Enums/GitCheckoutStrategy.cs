@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
 	[Flags]
-	public enum GitCheckoutStrategy : uint
+	internal enum GitCheckoutStrategy : uint
 	{
 		None = 0,
 		Safe = 1u << 0,

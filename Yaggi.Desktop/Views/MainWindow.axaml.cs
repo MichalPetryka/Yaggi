@@ -5,8 +5,14 @@ using System;
 
 namespace Yaggi.Desktop.Views
 {
+	/// <summary>
+	/// Main <see cref="Window"/> of the application
+	/// </summary>
 	public class MainWindow : Window
 	{
+		/// <summary>
+		/// Creates the window and initializes its content
+		/// </summary>
 		public MainWindow()
 		{
 			Opened += OnOpened;

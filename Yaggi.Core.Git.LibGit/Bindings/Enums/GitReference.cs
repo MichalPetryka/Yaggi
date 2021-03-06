@@ -1,6 +1,6 @@
 ﻿namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
-	public enum GitReference
+	internal enum GitReference
 	{
 		Invalid = 0,
 		Direct = 1,

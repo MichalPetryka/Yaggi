@@ -5,12 +5,16 @@ using Yaggi.Core.Git.LibGit.Bindings.Structures;
 
 namespace Yaggi.Core.Git.LibGit
 {
+	/// <summary>
+	/// LibGit2 repository implementation
+	/// </summary>
 	public unsafe class LibGitRepository : GitRepository
 	{
 		internal readonly Bindings.Structures.GitRepository* Handle;
 		private readonly object _freeLock = new();
 		private bool _valid = true;
 
+		/// <inheritdoc/>
 		public override GitRemote[] Remotes
 		{
 			get
@@ -41,6 +45,7 @@ namespace Yaggi.Core.Git.LibGit
 			Handle = handle;
 		}
 
+		/// <inheritdoc/>
 		protected override void Dispose(bool disposing)
 		{
 			lock (_freeLock)

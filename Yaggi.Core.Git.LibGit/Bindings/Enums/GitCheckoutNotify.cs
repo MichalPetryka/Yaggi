@@ -3,7 +3,7 @@
 namespace Yaggi.Core.Git.LibGit.Bindings.Enums
 {
 	[Flags]
-	public enum GitCheckoutNotify : uint
+	internal enum GitCheckoutNotify : uint
 	{
 		None = 0,
 		Conflict = 1u << 0,
