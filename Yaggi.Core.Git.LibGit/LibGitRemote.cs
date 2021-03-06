@@ -20,7 +20,7 @@ namespace Yaggi.Core.Git.LibGit
 				{
 					if (strArray.count == 0)
 					{
-						Repository.RenameRemote(_name, value);
+						RenameRemote(_name, value);
 						_name = value;
 						return;
 					}

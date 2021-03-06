@@ -13,5 +13,10 @@ namespace Yaggi.Core.Git
 		{
 			Repository = repository ?? throw new ArgumentNullException(nameof(repository));
 		}
+
+		protected void RenameRemote(string oldName, string newName)
+		{
+			Repository.RenameRemote(oldName, newName);
+		}
 	}
 }
