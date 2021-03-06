@@ -108,47 +108,47 @@ namespace Yaggi.Core.IO
 			if (!ContainsWhitespaceOrQuote(argument))
 				return argument;
 
-			StringBuilder sb = StringBuilderPool.Rent(argument.Length * 2);
+			StringBuilder stringBuilder = StringBuilderPool.Rent(argument.Length * 2);
 
-			sb.Append(Quote);
-			int idx = 0;
-			while (idx < argument.Length)
+			stringBuilder.Append(Quote);
+			int i = 0;
+			while (i < argument.Length)
 			{
-				char c = argument[idx++];
+				char c = argument[i++];
 				switch (c)
 				{
 					case Backslash:
 						int numBackSlash = 1;
-						while (idx < argument.Length && argument[idx] == Backslash)
+						while (i < argument.Length && argument[i] == Backslash)
 						{
-							idx++;
+							i++;
 							numBackSlash++;
 						}
 
-						if (idx == argument.Length)
-							sb.Append(Backslash, numBackSlash * 2);
-						else if (argument[idx] == Quote)
+						if (i == argument.Length)
+							stringBuilder.Append(Backslash, numBackSlash * 2);
+						else if (argument[i] == Quote)
 						{
-							sb.Append(Backslash, numBackSlash * 2 + 1);
-							sb.Append(Quote);
-							idx++;
+							stringBuilder.Append(Backslash, numBackSlash * 2 + 1);
+							stringBuilder.Append(Quote);
+							i++;
 						}
 						else
-							sb.Append(Backslash, numBackSlash);
+							stringBuilder.Append(Backslash, numBackSlash);
 
 						continue;
 					case Quote:
-						sb.Append(Backslash);
-						sb.Append(Quote);
+						stringBuilder.Append(Backslash);
+						stringBuilder.Append(Quote);
 						continue;
 					default:
-						sb.Append(c);
+						stringBuilder.Append(c);
 						break;
 				}
 			}
 
-			sb.Append(Quote);
-			return StringBuilderPool.ToStringReturn(sb);
+			stringBuilder.Append(Quote);
+			return StringBuilderPool.ToStringReturn(stringBuilder);
 		}
 
 		private static bool ContainsWhitespaceOrQuote(string s)

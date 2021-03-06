@@ -95,6 +95,39 @@ namespace Yaggi.Core.Git.LibGit.Bindings
 		[DllImport(Library, EntryPoint = "git_remote_set_url", CallingConvention = Convention, BestFitMapping = false)]
 		public static extern GitErrorCode SetRemoteUrl(Structures.GitRepository* repository, [MarshalAs(StringType)] string remote, [MarshalAs(StringType)] string url);
 
+		[DllImport(Library, EntryPoint = "git_credential_free", CallingConvention = Convention)]
+		public static extern void CredentialFree(GitCredential* cred);
+
+		[DllImport(Library, EntryPoint = "git_credential_has_username", CallingConvention = Convention)]
+		public static extern int CredentialHasUsername(GitCredential* cred);
+
+		[DllImport(Library, EntryPoint = "git_credential_get_username", CallingConvention = Convention)]
+		public static extern IntPtr CredentialGetUsername(GitCredential* cred);
+
+		[DllImport(Library, EntryPoint = "git_credential_userpass_plaintext_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialUserpassPlaintextNew(GitCredential** cred, IntPtr username, IntPtr password);
+
+		[DllImport(Library, EntryPoint = "git_credential_default_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialDefaultNew(GitCredential** cred);
+
+		[DllImport(Library, EntryPoint = "git_credential_username_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialUsernameNew(GitCredential** cred, IntPtr username);
+
+		[DllImport(Library, EntryPoint = "git_credential_ssh_key_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialSshKeyNew(GitCredential** cred, IntPtr username, IntPtr publickey, IntPtr privatekey, IntPtr passphrase);
+
+		[DllImport(Library, EntryPoint = "git_credential_ssh_key_memory_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialSshKeyMemoryNew(GitCredential** cred, IntPtr username, IntPtr publickey, IntPtr privatekey, IntPtr passphrase);
+
+		[DllImport(Library, EntryPoint = "git_credential_ssh_interactive_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialSshInteractiveNew(GitCredential** cred, IntPtr username, IntPtr promptCallback, IntPtr payload);
+
+		[DllImport(Library, EntryPoint = "git_credential_ssh_key_from_agent", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialSshKeyFromAgent(GitCredential** cred, IntPtr username);
+
+		[DllImport(Library, EntryPoint = "git_credential_ssh_custom_new", CallingConvention = Convention)]
+		public static extern GitErrorCode CredentialSshCustomNew(GitCredential** cred, IntPtr username, byte* publickey, nuint publickeyLength, IntPtr signCallback, IntPtr payload);
+
 		public static bool TryGetError(out string message, out GitErrorClass error)
 		{
 			GitError* err = GetLastError();

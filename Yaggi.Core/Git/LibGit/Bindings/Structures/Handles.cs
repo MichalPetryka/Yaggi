@@ -121,4 +121,7 @@ namespace Yaggi.Core.Git.LibGit.Bindings.Structures
 
 	[StructLayout(LayoutKind.Sequential)]
 	public readonly struct GitMailMap { }
+
+	[StructLayout(LayoutKind.Sequential)]
+	public readonly struct GitCredential { }
 }

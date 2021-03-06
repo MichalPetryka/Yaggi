@@ -11,7 +11,7 @@ namespace Yaggi.Core.Tests
 
 		public PathUtilsTests()
 		{
-			string name = Guid.NewGuid() + "abcde";
+			string name = Guid.NewGuid() + "aBcDe";
 			File.Create(name.ToLowerInvariant()).Close();
 			_insensitiveCasing = File.Exists(name.ToUpperInvariant());
 			File.Delete(name.ToLowerInvariant());
@@ -25,7 +25,27 @@ namespace Yaggi.Core.Tests
 				string path = PathUtils.NormalizeFilePath(file);
 				Assert.True(File.Exists(path), $"\"{file}\" - \"{path}\"");
 				if (_insensitiveCasing)
-					Assert.Equal(PathUtils.NormalizeFilePath(file.ToLowerInvariant()), PathUtils.NormalizeFilePath(file.ToUpperInvariant()));
+				{
+					string lower = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToLowerInvariant());
+					string upper = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToUpperInvariant());
+					Assert.Equal(PathUtils.NormalizeFilePath(lower), PathUtils.NormalizeFilePath(upper));
+				}
+				else
+				{
+					string lower = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToLowerInvariant());
+					if (!File.Exists(lower))
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeFilePath(lower);
+						});
+
+					string upper = Path.Combine(Path.GetDirectoryName(file)!, Path.GetFileName(file).ToUpperInvariant());
+					if (!File.Exists(upper))
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeFilePath(upper);
+						});
+				}
 			}
 		}
 
@@ -40,7 +60,27 @@ namespace Yaggi.Core.Tests
 				Assert.True(Directory.Exists(path2), $"\"{directory}\" - \"{path2}\"");
 				Assert.Equal(path, path2);
 				if (_insensitiveCasing)
-					Assert.Equal(PathUtils.NormalizeDirectoryPath(directory.ToLowerInvariant()), PathUtils.NormalizeDirectoryPath(directory.ToUpperInvariant()));
+				{
+					string lower = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToLowerInvariant());
+					string upper = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToUpperInvariant());
+					Assert.Equal(PathUtils.NormalizeDirectoryPath(lower), PathUtils.NormalizeDirectoryPath(upper));
+				}
+				else
+				{
+					string lower = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToLowerInvariant());
+					if (!Directory.Exists(lower))
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeDirectoryPath(lower);
+						});
+
+					string upper = Path.Combine(Path.GetDirectoryName(directory)!, Path.GetFileName(directory).ToUpperInvariant());
+					if (!Directory.Exists(upper))
+						Assert.ThrowsAny<Exception>(() =>
+						{
+							_ = PathUtils.NormalizeDirectoryPath(upper);
+						});
+				}
 			}
 		}
 	}
