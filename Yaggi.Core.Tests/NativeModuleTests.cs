@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Xunit;
-using Yaggi.Core.Marshaling;
+using Yaggi.Core.Interop;
 
 namespace Yaggi.Core.Tests
 {
-	public class NativeLibraryUtilsTests
+	public class NativeModuleTests
 	{
 		[Theory]
 		[InlineData(null, null, "Kernel32.dll", "libc.so", "libc.dylib", "libc")]
@@ -13,9 +12,12 @@ namespace Yaggi.Core.Tests
 		[InlineData("Kernel32.dll", "ntdll.dll", "libc.so", "libdl.so", "libc.dylib", "libdl.dylib", "libc", "libdl")]
 		public void LoadTest(params string[] names)
 		{
-			IntPtr module = NativeLibraryUtils.LoadAny(names);
-			Assert.NotEqual(IntPtr.Zero, module);
-			NativeLibrary.Free(module);
+			using (NativeModule nativeModule = new(names))
+			{
+				Assert.NotEqual(IntPtr.Zero, nativeModule.Module);
+				Assert.False(string.IsNullOrEmpty(nativeModule.Name));
+				Assert.Contains(nativeModule.Name, names);
+			}
 		}
 
 		[Theory]
@@ -23,19 +25,19 @@ namespace Yaggi.Core.Tests
 		[InlineData(null, null, null)]
 		public void InvalidNamesTest(params string[] names)
 		{
-			Assert.Equal(names.Length, Assert.Throws<AggregateException>(() => { NativeLibraryUtils.LoadAny(names); }).InnerExceptions.Count);
+			Assert.Equal(names.Length, Assert.Throws<AggregateException>(() => new NativeModule(names)).InnerExceptions.Count);
 		}
 
 		[Fact]
 		public void NullNamesTest()
 		{
-			Assert.Throws<ArgumentNullException>(() => { NativeLibraryUtils.LoadAny(null); });
+			Assert.Throws<ArgumentNullException>(() => new NativeModule(null));
 		}
 
 		[Fact]
 		public void EmptyNamesTest()
 		{
-			Assert.Throws<ArgumentOutOfRangeException>(() => { NativeLibraryUtils.LoadAny(); });
+			Assert.Throws<ArgumentOutOfRangeException>(() => new NativeModule());
 		}
 	}
 }

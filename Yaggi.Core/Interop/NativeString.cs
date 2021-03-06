@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Yaggi.Core.Marshaling
+namespace Yaggi.Core.Interop
 {
 	/// <summary>
 	/// Manages the lifetime of a native representation of a string

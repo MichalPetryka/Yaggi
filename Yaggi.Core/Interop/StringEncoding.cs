@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-namespace Yaggi.Core.Marshaling
+namespace Yaggi.Core.Interop
 {
 	/// <summary>
 	/// String encoding used in native string representation

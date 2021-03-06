@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Yaggi.Core.Marshaling
+namespace Yaggi.Core.Interop
 {
 	/// <summary>
 	/// Provides utility methods for working on strings
