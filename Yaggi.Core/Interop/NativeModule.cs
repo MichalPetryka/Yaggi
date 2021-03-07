@@ -18,10 +18,13 @@ namespace Yaggi.Core.Interop
 		/// Loaded module name
 		/// </summary>
 		public string Name { get; }
+		/// <summary>
+		/// Module usability, false when module was freed.
+		/// </summary>
+		public bool Valid { get; private set; }
 
 		private readonly object _moduleLock = new();
 		private readonly bool _freeOnDispose;
-		private bool _valid;
 
 		/// <summary>
 		/// Loads the provided library name
@@ -44,7 +47,7 @@ namespace Yaggi.Core.Interop
 				if (Module == IntPtr.Zero)
 					throw new DllNotFoundException();
 				Name = name;
-				_valid = Module != IntPtr.Zero;
+				Valid = Module != IntPtr.Zero;
 				_freeOnDispose = freeOnDispose;
 			}
 		}
@@ -91,7 +94,7 @@ namespace Yaggi.Core.Interop
 					throw new AggregateException(exceptions);
 				ListPool<Exception>.Return(exceptions);
 
-				_valid = Module != IntPtr.Zero;
+				Valid = Module != IntPtr.Zero;
 				_freeOnDispose = freeOnDispose;
 			}
 		}
@@ -103,7 +106,7 @@ namespace Yaggi.Core.Interop
 		/// <returns>Exported pointer</returns>
 		public IntPtr GetSymbol(string symbol)
 		{
-			if (!_valid)
+			if (!Valid)
 				throw new ObjectDisposedException(nameof(NativeModule));
 			return NativeLibrary.GetExport(Module, symbol);
 		}
@@ -116,7 +119,7 @@ namespace Yaggi.Core.Interop
 		/// <returns>Created delegate</returns>
 		public T GetDelegate<T>(string symbol) where T : Delegate
 		{
-			if (!_valid)
+			if (!Valid)
 				throw new ObjectDisposedException(nameof(NativeModule));
 			return Marshal.GetDelegateForFunctionPointer<T>(NativeLibrary.GetExport(Module, symbol));
 		}
@@ -129,7 +132,7 @@ namespace Yaggi.Core.Interop
 		/// <returns>Created delegate</returns>
 		public object GetDelegate(string symbol, Type type)
 		{
-			if (!_valid)
+			if (!Valid)
 				throw new ObjectDisposedException(nameof(NativeModule));
 			return Marshal.GetDelegateForFunctionPointer(NativeLibrary.GetExport(Module, symbol), type);
 		}
@@ -138,10 +141,10 @@ namespace Yaggi.Core.Interop
 		{
 			lock (_moduleLock)
 			{
-				if (!_valid || !_freeOnDispose)
+				if (!Valid || !_freeOnDispose)
 					return;
 				NativeLibrary.Free(Module);
-				_valid = false;
+				Valid = false;
 			}
 		}
 
