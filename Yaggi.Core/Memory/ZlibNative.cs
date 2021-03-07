@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Yaggi.Core.Marshaling;
+using Yaggi.Core.Interop;
 
 namespace Yaggi.Core.Memory
 {
 	internal static unsafe class ZlibNative
 	{
-		private static readonly IntPtr Module;
+		private static readonly NativeModule Module;
 
 		public static readonly bool Supported;
 		public static readonly string Version;
@@ -16,16 +16,16 @@ namespace Yaggi.Core.Memory
 		{
 			try
 			{
-				Module = NativeLibraryUtils.LoadAny("zlib1", "libzlib", "libz", "libz.so", "zlib");
+				Module = new NativeModule("zlib1", "libzlib", "libz", "libz.so", "zlib");
 
-				delegate* unmanaged[Cdecl]<IntPtr> export = (delegate* unmanaged[Cdecl]<IntPtr>)NativeLibrary.GetExport(Module, "zlibVersion");
+				delegate* unmanaged[Cdecl]<IntPtr> export = (delegate* unmanaged[Cdecl]<IntPtr>)Module.GetSymbol("zlibVersion");
 
 				if (export == null)
 					throw new PlatformNotSupportedException();
 
 				Version = Marshal.PtrToStringUTF8(export()) ?? throw new NullReferenceException();
 
-				Append = (delegate* unmanaged[Cdecl]<uint, byte*, uint, uint>)NativeLibrary.GetExport(Module, "crc32");
+				Append = (delegate* unmanaged[Cdecl]<uint, byte*, uint, uint>)Module.GetSymbol("crc32");
 
 				if (Append == null)
 					throw new PlatformNotSupportedException();
@@ -34,9 +34,8 @@ namespace Yaggi.Core.Memory
 			}
 			catch
 			{
-				if (Module != IntPtr.Zero)
-					NativeLibrary.Free(Module);
-				Module = IntPtr.Zero;
+				Module?.Dispose();
+				Module = null;
 				Version = null;
 				Append = null;
 				Supported = false;

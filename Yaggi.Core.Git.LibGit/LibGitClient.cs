@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
 using Yaggi.Core.Git.LibGit.Bindings.Enums;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
+using Yaggi.Core.Interop;
 using Yaggi.Core.IO;
-using Yaggi.Core.Marshaling;
 using Yaggi.Core.Memory;
 
 namespace Yaggi.Core.Git.LibGit

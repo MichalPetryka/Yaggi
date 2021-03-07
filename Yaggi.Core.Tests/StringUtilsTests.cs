@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Xunit;
-using Yaggi.Core.Marshaling;
+using Yaggi.Core.Interop;
 
 namespace Yaggi.Core.Tests
 {
