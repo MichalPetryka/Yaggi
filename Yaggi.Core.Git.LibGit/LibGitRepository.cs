@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
+using Yaggi.Core.Memory.Disposables;
 
 namespace Yaggi.Core.Git.LibGit
 {
@@ -21,19 +22,13 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				GitStrArray strArray = new();
 				ThrowHelper.ThrowOnError(GitNative.ListRemotes(&strArray, Handle));
-				try
+				using (Disposable.Create(&strArray, GitNative.FreeStrArray))
 				{
 					GitRemote[] remotes = new GitRemote[strArray.count];
 					for (nuint i = 0; i < strArray.count; i++)
-					{
 						remotes[i] = TryGetRemote(Marshal.PtrToStringUTF8(strArray.strings[i]), name => new LibGitRemote(name, this));
-					}
 
 					return remotes;
-				}
-				finally
-				{
-					GitNative.FreeStrArray(&strArray);
 				}
 			}
 		}

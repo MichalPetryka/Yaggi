@@ -12,6 +12,7 @@ using Yaggi.Core.Cryptography;
 using Yaggi.Core.Cryptography.Crc32C;
 using Yaggi.Core.IO;
 using Yaggi.Core.Memory;
+using Yaggi.Core.Memory.Disposables;
 
 namespace Yaggi.Core.Git.GitCommandline
 {
@@ -177,25 +178,17 @@ namespace Yaggi.Core.Git.GitCommandline
 				return;
 			}
 
-			byte[] bytes = Encoding.UTF8.GetBytes(responses[0]);
-			try
+			using (MultiDisposable multiDisposable = new())
 			{
-				byte[] encrypted = AesGcmHelper.Encrypt(bytes, key);
-				try
-				{
-					int len = encrypted.Length;
-					MemoryMarshal.Write(intBuffer, ref len);
-					pipe.Write(intBuffer);
-					pipe.Write(encrypted);
-				}
-				finally
-				{
-					encrypted.AsSpan().Clear();
-				}
-			}
-			finally
-			{
-				bytes.AsSpan().Clear();
+				byte[] encrypted = multiDisposable.Add(Disposable.Create(
+					AesGcmHelper.Encrypt(
+						multiDisposable.Add(Disposable.Create(Encoding.UTF8.GetBytes(responses[0]),
+							bytes => bytes.AsSpan().Clear())).Value, key),
+					bytes => bytes.AsSpan().Clear())).Value;
+				int len = encrypted.Length;
+				MemoryMarshal.Write(intBuffer, ref len);
+				pipe.Write(intBuffer);
+				pipe.Write(encrypted);
 			}
 		}
 

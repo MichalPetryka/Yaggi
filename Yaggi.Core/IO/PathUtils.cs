@@ -81,10 +81,7 @@ namespace Yaggi.Core.IO
 				finally
 				{
 					ArrayPool<char>.Shared.Return(buffer);
-#pragma warning disable CA2219
-					if (CloseHandle(handle) == 0)
-						throw new Win32Exception();
-#pragma warning restore CA2219
+					CloseHandle(handle);
 				}
 			}
 
@@ -118,6 +115,12 @@ namespace Yaggi.Core.IO
 			return Path.Combine(basePath, name);
 		}
 
+		private static void CloseHandle(IntPtr handle)
+		{
+			if (CloseHandleInternal(handle) == 0)
+				throw new Win32Exception();
+		}
+
 		[DllImport("Kernel32", EntryPoint = "CreateFileW", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
 		private static extern IntPtr CreateFile(string path, uint access, uint sharemode, IntPtr security, uint disposition, uint flags, IntPtr template);
 
@@ -125,7 +128,7 @@ namespace Yaggi.Core.IO
 		private static extern uint GetFinalPathNameByHandle(IntPtr handle, char* path, uint length, uint flags);
 
 		[DllImport("Kernel32", EntryPoint = "CloseHandle", ExactSpelling = true, SetLastError = true)]
-		private static extern int CloseHandle(IntPtr handle);
+		private static extern int CloseHandleInternal(IntPtr handle);
 
 		[DllImport("libc", EntryPoint = "realpath", ExactSpelling = true, BestFitMapping = false, SetLastError = true)]
 		[return: MarshalAs(UnmanagedType.LPUTF8Str)]

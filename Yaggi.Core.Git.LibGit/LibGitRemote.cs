@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
+using Yaggi.Core.Memory.Disposables;
 
 namespace Yaggi.Core.Git.LibGit
 {
@@ -20,7 +21,7 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				GitStrArray strArray = new();
 				ThrowHelper.ThrowOnError(GitNative.SetRemoteName(&strArray, Repository.Handle, _name, value));
-				try
+				using (Disposable.Create(&strArray, GitNative.FreeStrArray))
 				{
 					if (strArray.count == 0)
 					{
@@ -35,10 +36,6 @@ namespace Yaggi.Core.Git.LibGit
 
 					throw new AggregateException(exceptions);
 				}
-				finally
-				{
-					GitNative.FreeStrArray(&strArray);
-				}
 			}
 		}
 
@@ -49,14 +46,8 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				Bindings.Structures.GitRemote* remote = null;
 				ThrowHelper.ThrowOnError(GitNative.LookupRemote(&remote, Repository.Handle, _name));
-				try
-				{
+				using (Disposable.Create(remote, GitNative.FreeRemote))
 					return Marshal.PtrToStringUTF8(GitNative.GetRemoteUrl(remote));
-				}
-				finally
-				{
-					GitNative.FreeRemote(remote);
-				}
 			}
 			set => ThrowHelper.ThrowOnError(GitNative.SetRemoteUrl(Repository.Handle, _name, value));
 		}
