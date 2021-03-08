@@ -46,6 +46,7 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				Bindings.Structures.GitRemote* remote = null;
 				ThrowHelper.ThrowOnError(GitNative.LookupRemote(&remote, Repository.Handle, _name));
+
 				using (StackDisposable.Create(remote, GitNative.FreeRemote))
 					return Marshal.PtrToStringUTF8(GitNative.GetRemoteUrl(remote));
 			}
