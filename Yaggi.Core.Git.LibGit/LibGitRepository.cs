@@ -22,7 +22,7 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				GitStrArray strArray = new();
 				ThrowHelper.ThrowOnError(GitNative.ListRemotes(&strArray, Handle));
-				using (Disposable.Create(&strArray, GitNative.FreeStrArray))
+				using (StackDisposable.Create(&strArray, GitNative.FreeStrArray))
 				{
 					GitRemote[] remotes = new GitRemote[strArray.count];
 					for (nuint i = 0; i < strArray.count; i++)

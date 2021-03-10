@@ -21,7 +21,7 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				GitStrArray strArray = new();
 				ThrowHelper.ThrowOnError(GitNative.SetRemoteName(&strArray, Repository.Handle, _name, value));
-				using (Disposable.Create(&strArray, GitNative.FreeStrArray))
+				using (StackDisposable.Create(&strArray, GitNative.FreeStrArray))
 				{
 					if (strArray.count == 0)
 					{
@@ -46,7 +46,7 @@ namespace Yaggi.Core.Git.LibGit
 			{
 				Bindings.Structures.GitRemote* remote = null;
 				ThrowHelper.ThrowOnError(GitNative.LookupRemote(&remote, Repository.Handle, _name));
-				using (Disposable.Create(remote, GitNative.FreeRemote))
+				using (StackDisposable.Create(remote, GitNative.FreeRemote))
 					return Marshal.PtrToStringUTF8(GitNative.GetRemoteUrl(remote));
 			}
 			set => ThrowHelper.ThrowOnError(GitNative.SetRemoteUrl(Repository.Handle, _name, value));

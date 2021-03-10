@@ -3,10 +3,11 @@
 namespace Yaggi.Core.Memory.Disposables
 {
 	/// <summary>
-	/// Manages lifetime of data in a pointer using a provided dispose callback
+	/// Manages lifetime of data in a pointer using a provided dispose callback.
+	/// Unlike <see cref="PointerDisposable{T}"/> it's not threadsafe and doesn't prevent multiple dispose calls
 	/// </summary>
 	/// <typeparam name="T">Data type</typeparam>
-	public sealed unsafe class PointerDisposable<T> : IDisposable where T : unmanaged
+	public readonly unsafe struct StackPointerDisposable<T> : IDisposable where T : unmanaged
 	{
 		/// <summary>
 		/// Pointer to managed data
@@ -14,9 +15,6 @@ namespace Yaggi.Core.Memory.Disposables
 		public T* Value { get; }
 
 		private readonly DisposeCallback _action;
-		private readonly object _disposeLock = new();
-
-		private bool _disposable;
 
 		/// <summary>
 		/// Data dispose callback
@@ -29,37 +27,16 @@ namespace Yaggi.Core.Memory.Disposables
 		/// </summary>
 		/// <param name="value">Managed data</param>
 		/// <param name="callback">Dispose callback</param>
-		/// <remarks>Do NOT use stack pointers with this, use <see cref="StackPointerDisposable{T}"/> instead</remarks>
-		public PointerDisposable(T* value, DisposeCallback callback)
+		public StackPointerDisposable(T* value, DisposeCallback callback)
 		{
 			Value = value;
 			_action = callback ?? throw new ArgumentNullException(nameof(callback));
-			_disposable = true;
-		}
-
-		private void Free()
-		{
-			lock (_disposeLock)
-			{
-				if (!_disposable)
-					return;
-
-				_action(Value);
-				_disposable = false;
-			}
 		}
 
 		/// <inheritdoc/>
 		public void Dispose()
 		{
-			Free();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc/>
-		~PointerDisposable()
-		{
-			Free();
+			_action(Value);
 		}
 	}
 }
