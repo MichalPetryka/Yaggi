@@ -31,6 +31,12 @@ namespace Yaggi.Core.Git
 		/// <param name="authenticationProvider">Credential provider</param>
 		/// <returns>Cloned repository</returns>
 		public abstract GitRepository CloneRepository(string path, string url, Action<string, double> progress = null, AuthenticationProviderCallback authenticationProvider = null);
+		/// <summary>
+		/// Opens an existing repository
+		/// </summary>
+		/// <param name="path">Repository path</param>
+		/// <returns>Opened repository</returns>
+		public abstract GitRepository OpenRepository(string path);
 
 		/// <summary>
 		/// Releases resources held by the client

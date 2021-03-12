@@ -102,6 +102,13 @@ namespace Yaggi.Core.Git.LibGit
 			}
 		}
 
+		/// <inheritdoc/>
+		public override GitRepository OpenRepository(string path)
+		{
+			ThrowHelper.ThrowOnError(GitNative.OpenRepository(out Bindings.Structures.GitRepository* repository, path, GitRepositoryOpenFlag.NoSearch, null));
+			return new LibGitRepository(repository, path);
+		}
+
 		private static GitErrorCode GetCredential(AuthenticationProviderCallback authenticationProvider,
 												GitCredentialType types, IntPtr remoteUrlPtr, IntPtr usernameFromUrlPtr,
 												List<Action> freeCallbacks, GitCredential** data,

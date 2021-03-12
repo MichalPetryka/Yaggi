@@ -44,6 +44,12 @@ namespace Yaggi.Core.Git.LibGit.Bindings
 		[DllImport(Library, EntryPoint = "git_clone", CallingConvention = Convention, BestFitMapping = false)]
 		public static extern GitErrorCode CloneRepository(out Structures.GitRepository* repository, [MarshalAs(StringType)] string url, [MarshalAs(StringType)] string path, GitCloneOptions* options);
 
+		[DllImport(Library, EntryPoint = "git_repository_open", CallingConvention = Convention, BestFitMapping = false)]
+		public static extern GitErrorCode OpenRepository(out Structures.GitRepository* repository, [MarshalAs(StringType)] string path);
+
+		[DllImport(Library, EntryPoint = "git_repository_open_ext", CallingConvention = Convention, BestFitMapping = false)]
+		public static extern GitErrorCode OpenRepository(out Structures.GitRepository* repository, [MarshalAs(StringType)] string path, GitRepositoryOpenFlag flags, [MarshalAs(StringType)] string ceilingDirs);
+
 		[DllImport(Library, EntryPoint = "git_repository_free", CallingConvention = Convention)]
 		public static extern void FreeRepository(Structures.GitRepository* repository);
 

@@ -90,6 +90,12 @@ namespace Yaggi.Core.Git.GitCommandline
 			}
 		}
 
+		/// <inheritdoc/>
+		public override GitRepository OpenRepository(string path)
+		{
+			return new GitCommandlineRepository(path);
+		}
+
 		private static void StartClone(string path, string url, Action<string, double> progress, NamedPipeServerStream pipe, string pipeName, byte[] key)
 		{
 			const string git = "git";
