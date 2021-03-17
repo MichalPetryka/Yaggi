@@ -2,6 +2,7 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using System;
+using System.Runtime;
 
 namespace Yaggi.Desktop.Views
 {
@@ -24,6 +25,10 @@ namespace Yaggi.Desktop.Views
 
 		private async void OnOpened(object sender, EventArgs e)
 		{
+			GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+			GC.Collect();
+			GC.WaitForPendingFinalizers();
+			GC.Collect();
 			// test clone code
 			/*await Task.Run(() =>
 			{
