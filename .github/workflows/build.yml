@@ -35,8 +35,8 @@ jobs:
     - name: Build ${{matrix.project}}
       run: dotnet publish -c ${{matrix.configuration}} -r ${{matrix.runtime}} --no-restore ${{matrix.project}}
 
-#    - name: Upload ${{matrix.project}}
-#      uses: actions/upload-artifact@v2
-#      with:
-#        name: ${{matrix.project}} (${{matrix.runtime}} ${{matrix.configuration}})
-#        path: ${{matrix.project}}/bin/${{matrix.configuration}}/net5.0/${{matrix.runtime}}/publish
+    - name: Upload ${{matrix.project}}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{matrix.project}} (${{matrix.runtime}} ${{matrix.configuration}})
+        path: ${{matrix.project}}/bin/${{matrix.configuration}}/net5.0/${{matrix.runtime}}/publish
