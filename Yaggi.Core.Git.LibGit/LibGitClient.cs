@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Yaggi.Core.Git.LibGit.Bindings;
@@ -7,7 +6,7 @@ using Yaggi.Core.Git.LibGit.Bindings.Enums;
 using Yaggi.Core.Git.LibGit.Bindings.Structures;
 using Yaggi.Core.Interop;
 using Yaggi.Core.IO;
-using Yaggi.Core.Memory;
+using Yaggi.Core.Memory.Disposables;
 
 namespace Yaggi.Core.Git.LibGit
 {
@@ -54,8 +53,7 @@ namespace Yaggi.Core.Git.LibGit
 			path = PathUtils.NormalizeDirectoryPath(path);
 			GitCloneOptions options = new();
 			ThrowHelper.ThrowOnError(GitNative.InitializeCloneOptions(&options, 1));
-			List<Action> freeCallbacks = ListPool<Action>.Rent();
-			try
+			using (MultiDisposable multiDisposable = new())
 			{
 				// ReSharper disable ConvertToLocalFunction
 				if (authenticationProvider != null)
@@ -63,9 +61,9 @@ namespace Yaggi.Core.Git.LibGit
 					GitCredentialType type = 0;
 					int tries = 0;
 					GitCallbacks.CredentialAcquireCallback acquireCredentials = (data, remoteUrlPtr, usernameFromUrlPtr, types, _) =>
-						GetCredential(authenticationProvider, types, remoteUrlPtr, usernameFromUrlPtr, freeCallbacks, data, ref type, ref tries);
-					GCHandle handle1 = GCHandle.Alloc(acquireCredentials, GCHandleType.Normal);
-					freeCallbacks.Add(() => handle1.Free());
+						// ReSharper disable once AccessToDisposedClosure
+						GetCredential(authenticationProvider, types, remoteUrlPtr, usernameFromUrlPtr, multiDisposable, data, ref type, ref tries);
+					multiDisposable.Add(Disposable.Create(GCHandle.Alloc(acquireCredentials, GCHandleType.Normal), handle => handle.Free()));
 					options.fetchOpts.callbacks.credentials = Marshal.GetFunctionPointerForDelegate(acquireCredentials);
 				}
 				if (progress != null)
@@ -81,24 +79,16 @@ namespace Yaggi.Core.Git.LibGit
 						}
 						return 0;
 					};
-					GCHandle handle1 = GCHandle.Alloc(indexer, GCHandleType.Normal);
-					freeCallbacks.Add(() => handle1.Free());
+					multiDisposable.Add(Disposable.Create(GCHandle.Alloc(indexer, GCHandleType.Normal), handle => handle.Free()));
 					options.fetchOpts.callbacks.transferProgress = Marshal.GetFunctionPointerForDelegate(indexer);
 					GitCallbacks.CheckoutProgressCallback checkout = (_, steps, totalSteps, _) =>
 						progress("Checking out", (double)steps / totalSteps);
-					GCHandle handle2 = GCHandle.Alloc(checkout, GCHandleType.Normal);
-					freeCallbacks.Add(() => handle2.Free());
+					multiDisposable.Add(Disposable.Create(GCHandle.Alloc(checkout, GCHandleType.Normal), handle => handle.Free()));
 					options.checkoutOpts.progressCb = Marshal.GetFunctionPointerForDelegate(checkout);
 				}
 				// ReSharper restore ConvertToLocalFunction
 				ThrowHelper.ThrowOnError(GitNative.CloneRepository(out Bindings.Structures.GitRepository* repository, url, path, &options));
 				return new LibGitRepository(repository, path);
-			}
-			finally
-			{
-				foreach (Action callback in freeCallbacks)
-					callback();
-				ListPool<Action>.Return(freeCallbacks);
 			}
 		}
 
@@ -111,7 +101,7 @@ namespace Yaggi.Core.Git.LibGit
 
 		private static GitErrorCode GetCredential(AuthenticationProviderCallback authenticationProvider,
 												GitCredentialType types, IntPtr remoteUrlPtr, IntPtr usernameFromUrlPtr,
-												List<Action> freeCallbacks, GitCredential** data,
+												MultiDisposable multiDisposable, GitCredential** data,
 												ref GitCredentialType type, ref int tries)
 		{
 			if (type != types)
@@ -133,24 +123,24 @@ namespace Yaggi.Core.Git.LibGit
 			// ReSharper restore HeapView.BoxingAllocation
 			string usernameFromUrl = Marshal.PtrToStringUTF8(usernameFromUrlPtr);
 
-			return ProcessCredential(authenticationProvider, types, freeCallbacks, data, prompt, usernameFromUrl);
+			return ProcessCredential(authenticationProvider, types, multiDisposable, data, prompt, usernameFromUrl);
 		}
 
 		private static GitErrorCode ProcessCredential(AuthenticationProviderCallback authenticationProvider,
-													GitCredentialType types, List<Action> freeCallbacks,
+													GitCredentialType types, MultiDisposable multiDisposable,
 													GitCredential** data, string prompt, string usernameFromUrl)
 		{
 			// ReSharper disable HeapView.BoxingAllocation
 			if (types.HasFlag(GitCredentialType.UserpassPlaintext))
 			{
-				(bool successful, string[] responses) = authenticationProvider(prompt, ("Username", usernameFromUrl, false), ("Password", (string)null, true));
+				(bool successful, string[] responses) = authenticationProvider(prompt,
+					("Username", usernameFromUrl, false),
+					("Password", (string)null, true));
 				if (!successful)
 					return GitErrorCode.User;
-				NativeString userName = new(responses[0], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => userName.Dispose());
-				NativeString password = new(responses[1], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => password.Dispose());
-				return GitNative.CredentialUserpassPlaintextNew(data, userName.Data, password.Data);
+				return GitNative.CredentialUserpassPlaintextNew(data,
+					multiDisposable.Add(new NativeString(responses[0], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[1], StringEncoding.UTF8, true)).Data);
 			}
 
 			if (types.HasFlag(GitCredentialType.Default))
@@ -158,48 +148,48 @@ namespace Yaggi.Core.Git.LibGit
 
 			if (types.HasFlag(GitCredentialType.Username))
 			{
-				(bool successful, string[] responses) = authenticationProvider(prompt, ("Username", usernameFromUrl, false));
+				(bool successful, string[] responses) = authenticationProvider(prompt,
+					("Username", usernameFromUrl, false));
 				if (!successful)
 					return GitErrorCode.User;
-				NativeString userName3 = new(responses[0], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => userName3.Dispose());
-				return GitNative.CredentialUsernameNew(data, userName3.Data);
+				return GitNative.CredentialUsernameNew(data,
+					multiDisposable.Add(new NativeString(responses[0], StringEncoding.UTF8, true)).Data);
 			}
 
 			if (types.HasFlag(GitCredentialType.SshKey))
 			{
 				string pubPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh", "id_rsa.pub");
 				string privPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh", "id_rsa");
-				(bool successful, string[] responses) = authenticationProvider(prompt, ("Username", usernameFromUrl, false), ("Public key path", File.Exists(pubPath) ? pubPath : null, false), ("Private key path", File.Exists(privPath) ? privPath : null, false), ("Passphrase", (string)null, true));
+				(bool successful, string[] responses) = authenticationProvider(prompt,
+					("Username", usernameFromUrl, false),
+					("Public key path", File.Exists(pubPath) ? pubPath : null, false),
+					("Private key path", File.Exists(privPath) ? privPath : null, false),
+					("Passphrase", (string)null, true));
 				if (!successful)
 					return GitErrorCode.User;
-				NativeString userName2 = new(responses[0], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => userName2.Dispose());
-				NativeString publickey = new(responses[1], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => publickey.Dispose());
-				NativeString privatekey = new(responses[2], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => privatekey.Dispose());
-				NativeString passphrase = new(responses[3], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => passphrase.Dispose());
-				return GitNative.CredentialSshKeyNew(data, userName2.Data, publickey.Data, privatekey.Data, passphrase.Data);
+				return GitNative.CredentialSshKeyNew(data,
+					multiDisposable.Add(new NativeString(responses[0], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[1], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[2], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[3], StringEncoding.UTF8, true)).Data);
 			}
 
 			if (types.HasFlag(GitCredentialType.SshMemory))
 			{
 				string pubPath2 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh", "id_rsa.pub");
 				string privPath2 = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".ssh", "id_rsa");
-				(bool successful, string[] responses) = authenticationProvider(prompt, ("Username", usernameFromUrl, false), ("Public key path", File.Exists(pubPath2) ? File.ReadAllText(pubPath2) : null, false), ("Private key path", File.Exists(privPath2) ? File.ReadAllText(privPath2) : null, false), ("Passphrase", (string)null, true));
+				(bool successful, string[] responses) = authenticationProvider(prompt,
+					("Username", usernameFromUrl, false),
+					("Public key path", File.Exists(pubPath2) ? File.ReadAllText(pubPath2) : null, false),
+					("Private key path", File.Exists(privPath2) ? File.ReadAllText(privPath2) : null, false),
+					("Passphrase", (string)null, true));
 				if (!successful)
 					return GitErrorCode.User;
-				NativeString userName4 = new(responses[0], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => userName4.Dispose());
-				NativeString publickey2 = new(responses[1], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => publickey2.Dispose());
-				NativeString privatekey2 = new(responses[2], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => privatekey2.Dispose());
-				NativeString passphrase2 = new(responses[3], StringEncoding.UTF8, true);
-				freeCallbacks.Add(() => passphrase2.Dispose());
-				return GitNative.CredentialSshKeyMemoryNew(data, userName4.Data, publickey2.Data, privatekey2.Data, passphrase2.Data);
+				return GitNative.CredentialSshKeyMemoryNew(data,
+					multiDisposable.Add(new NativeString(responses[0], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[1], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[2], StringEncoding.UTF8, true)).Data,
+					multiDisposable.Add(new NativeString(responses[3], StringEncoding.UTF8, true)).Data);
 			}
 			// ReSharper restore HeapView.BoxingAllocation
 
